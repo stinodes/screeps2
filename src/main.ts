@@ -1,4 +1,5 @@
-import { ErrorMapper } from "utils/ErrorMapper";
+import {Quest} from "quests";
+import {ErrorMapper} from "utils/ErrorMapper";
 
 declare global {
   /*
@@ -11,14 +12,18 @@ declare global {
   */
   // Memory extension samples
   interface Memory {
+    quests: {
+      [id: string]: Quest
+    }
     uuid: number;
     log: any;
   }
 
   interface CreepMemory {
-    role: string;
-    room: string;
-    working: boolean;
+    questId: string,
+    questDependencyQueue: string[],
+    name: string
+    room: string
   }
 
   // Syntax for adding proprties to `global` (ex "global.log")
