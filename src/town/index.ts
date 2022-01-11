@@ -7,6 +7,8 @@ import { Town } from './townTypes'
 
 export const createTown = (room: null | string) => room && { room }
 
+const decideQuestChain = () => {}
+
 const assignQuests = (openVillagers: CreepMemory[], openQuests: Quest[]) => {}
 
 export const town = (town: Town) => {
