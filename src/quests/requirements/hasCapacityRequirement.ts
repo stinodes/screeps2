@@ -1,17 +1,27 @@
-import {CreateRequirement, MeetsRequirement, Requirement, RequirementNames} from "./";
+import {
+  CreateRequirement,
+  MeetsRequirement,
+  Requirement,
+  RequirementNames,
+} from './'
 
 export type HasCapacityRequirement = Requirement & {
-  name: RequirementNames.hasCapacity,
+  name: RequirementNames.hasCapacity
   data: {}
 }
-export const createHasCapacityRequirement: CreateRequirement<{}, HasCapacityRequirement> = ({}) => {
+export const createHasCapacityRequirement: CreateRequirement<
+  {},
+  HasCapacityRequirement
+> = ({}) => {
   return {
     name: RequirementNames.hasCapacity,
     fulfillableBy: false,
-    data: {}
+    data: {},
   }
 }
 
-export const meetsCapacityRequirement: MeetsRequirement<HasCapacityRequirement> = (requirement, creep) => {
+export const meetsCapacityRequirement: MeetsRequirement<
+  HasCapacityRequirement
+> = (requirement, creep) => {
   return creep.store.getFreeCapacity() > 0
 }

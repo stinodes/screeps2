@@ -1,5 +1,8 @@
-import {Quest} from "quests";
-import {ErrorMapper} from "utils/ErrorMapper";
+import { Manager } from 'managers/managerTypes'
+import { Quest } from 'quests'
+import { createTown, town } from 'town'
+import { Town } from 'town/TownTypes'
+import { ErrorMapper } from 'utils/ErrorMapper'
 
 declare global {
   /*
@@ -15,34 +18,55 @@ declare global {
     quests: {
       [id: string]: Quest
     }
-    uuid: number;
-    log: any;
+    managers: {
+      [id: string]: Manager
+    }
+    towns: {
+      [name: string]: Town
+    }
+    uuid: number
+    log: any
   }
 
   interface CreepMemory {
-    questId: string,
-    questDependencyQueue: string[],
+    questId: string
+    questDependencyQueue: string[]
     name: string
-    room: string
+    town: string
   }
 
   // Syntax for adding proprties to `global` (ex "global.log")
   namespace NodeJS {
     interface Global {
-      log: any;
+      log: any
     }
   }
+}
+
+const setup = () => {
+  Memory.quests = {}
+  Memory.managers = {}
+  Memory.towns = {}
+  Memory.creeps = {}
+  const newTown = createTown(Object.values(Game.spawns)[0].room.name)
+  if (newTown) Memory.towns[newTown.room] = newTown
 }
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
-  console.log(`Current game tick is ${Game.time}`);
+  console.log(`Current game tick is ${Game.time}`)
+
+  if (!Object.values(Memory.towns).length) {
+    setup()
+  }
+
+  Object.values(Memory.towns).forEach(town)
 
   // Automatically delete memory of missing creeps
   for (const name in Memory.creeps) {
     if (!(name in Game.creeps)) {
-      delete Memory.creeps[name];
+      delete Memory.creeps[name]
     }
   }
-});
+})

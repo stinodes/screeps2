@@ -1,7 +1,13 @@
-import {Quest} from "../questTypes";
-import {HasBodyPartRequirement, meetsBodyRequirement} from "./hasBodyPartRequirement";
-import {HasCapacityRequirement, meetsCapacityRequirement} from "./hasCapacityRequirement";
-import {Requirement} from "./requirementTypes";
+import { Quest } from '../questTypes'
+import {
+  HasBodyPartRequirement,
+  meetsBodyRequirement,
+} from './hasBodyPartRequirement'
+import {
+  HasCapacityRequirement,
+  meetsCapacityRequirement,
+} from './hasCapacityRequirement'
+import { Requirement } from './requirementTypes'
 
 export enum RequirementNames {
   hasBodyPart,
@@ -14,7 +20,10 @@ export const meetsRequirement = (requirement: Requirement, creep: Creep) => {
     case RequirementNames.hasBodyPart:
       return meetsBodyRequirement(requirement as HasBodyPartRequirement, creep)
     case RequirementNames.hasCapacity:
-      return meetsCapacityRequirement(requirement as HasCapacityRequirement, creep)
+      return meetsCapacityRequirement(
+        requirement as HasCapacityRequirement,
+        creep,
+      )
     default:
       return true
   }
