@@ -6,19 +6,21 @@ import {
   Objective,
   ObjectiveName,
   ObjectiveTarget,
+  ObjectiveTargetEnum,
   Quest,
 } from './questTypes'
 import { Requirement } from './requirements'
 import { createHasBodyPartRequirement } from './requirements/hasBodyPartRequirement'
 import { createHasCapacityRequirement } from './requirements/hasCapacityRequirement'
 
-export const createHarvestQuest: CreateQuest<{ sourceId?: string }> = ({
+export const createHarvestQuest: CreateQuest<{ sourceId?: Id<Source> }> = ({
   id,
+  town,
   sourceId,
 }) => {
   const objective: Objective = {
     name: ObjectiveName.harvest,
-    target: sourceId || ObjectiveTarget.source,
+    target: sourceId || ObjectiveTargetEnum.source,
   }
 
   const requirements: Requirement[] = [
@@ -28,7 +30,8 @@ export const createHarvestQuest: CreateQuest<{ sourceId?: string }> = ({
   ]
 
   return {
-    id: id || v4,
+    id: id || v4(),
+    town,
     name: QuestNames.harvest,
     objective,
     requirements,

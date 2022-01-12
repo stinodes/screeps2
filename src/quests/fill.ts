@@ -15,7 +15,8 @@ import { createIsFullRequirement } from './requirements/isFullRequirement'
 
 export const createFillQuest: CreateQuest<{
   structureId?: Id<AnyStoreStructure>
-}> = ({ structureId, id }) => {
+  town: string
+}> = ({ structureId, town, id }) => {
   const objective: Objective = {
     name: ObjectiveName.transfer,
     target: structureId || ObjectiveTargetEnum.store,
@@ -29,6 +30,7 @@ export const createFillQuest: CreateQuest<{
 
   return {
     id: id || v4(),
+    town,
     name: QuestNames.fill,
     objective,
     requirements,

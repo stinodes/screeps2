@@ -1,7 +1,7 @@
-import {canCompleteFillQuest} from './fill'
-import {canCompleteHarvestQuest} from './harvest'
-import {CanCompleteQuest, CanPickUpQuest, Quest} from './questTypes'
-import {meetsRequirement} from './requirements'
+import { canCompleteFillQuest } from './fill'
+import { canCompleteHarvestQuest } from './harvest'
+import { CanCompleteQuest, CanPickUpQuest, Quest } from './questTypes'
+import { meetsRequirement } from './requirements'
 
 export enum QuestNames {
   harvest,
@@ -36,6 +36,10 @@ export const canCompleteQuest: CanCompleteQuest = (
 
 export const currentQuestTask = (quest: Quest, creep: Creep) => {
   const canPickUp = canPickUpQuest(quest, creep)
+  if (!canPickUp) return null
+  if (canPickUp === true) return quest
+  const nextTask = canPickUp.find(req => req.fulfillableBy)
+  return null
 }
 
 export * from './selectors'

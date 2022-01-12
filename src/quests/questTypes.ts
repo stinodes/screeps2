@@ -42,7 +42,7 @@ export type Objective<Type = any> = {
 }
 
 export type CreateQuest<Params extends {}> = (
-  params: Params & { id?: string },
+  params: Params & { id?: string; town: string },
 ) => Quest
 export type CanPickUpQuest = (
   quest: Quest,
