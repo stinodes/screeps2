@@ -1,13 +1,35 @@
-import { getManagersForTown, manager, ManagerTypes } from 'managers'
-import { getQuest, getQuestsForTown, Quest } from 'quests'
-import { v4 } from 'uuid'
-import { getVillagersForTown } from 'villagers'
-import { villager } from 'villagers/villager'
-import { Town } from './townTypes'
+import {getManagersForTown, manager, ManagerTypes} from 'managers'
+import {canPickUpQuest, getQuest, getQuestsForTown, Quest} from 'quests'
+import {v4} from 'uuid'
+import {getVillagerCreep, getVillagersForTown} from 'villagers'
+import {villager} from 'villagers/villager'
+import {Town} from './townTypes'
 
-export const createTown = (room: null | string) => room && { room }
+export const createTown = (room: null | string) => room && {room}
 
-const assignQuests = (openVillagers: CreepMemory[], openQuests: Quest[]) => {}
+const assignQuests = (openVillagers: CreepMemory[], openQuests: Quest[]) => {
+  const matches = openVillagers.reduce(
+    (matches, villager) => {
+
+      const possibleQuests = openQuests.filter(q => {
+        return Object.values(matches).indexOf(q.id) !== -1 &&
+          canPickUpQuest(q, getVillagerCreep(villager.name))
+      })
+
+      if (possibleQuests.length)
+        matches[villager.name] = possibleQuests[0].id
+
+      return matches
+    },
+    {} as {[villagerId: string]: string}
+  )
+
+  Object.keys(matches).forEach(
+    villagerName => {
+      const questId = matches[villagerName]
+      Memory.creeps[villagerName].questId = questId
+    })
+}
 
 export const town = (town: Town) => {
   const townManagers = getManagersForTown(town.room)
