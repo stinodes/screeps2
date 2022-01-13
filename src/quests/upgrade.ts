@@ -1,47 +1,45 @@
-import { v4 } from 'uuid'
 import { QuestNames } from 'quests'
+import { v4 } from 'uuid'
 import {
   CanCompleteQuest,
   CreateQuest,
   Objective,
   ObjectiveName,
-  ObjectiveTarget,
   ObjectiveTargetEnum,
   Quest,
 } from './questTypes'
 import { Requirement } from './requirements'
 import { createHasBodyPartRequirement } from './requirements/hasBodyPartRequirement'
-import { createHasCapacityRequirement } from './requirements/hasCapacityRequirement'
+import { createIsFullRequirement } from './requirements/isFullRequirement'
 
-export type HarvestQuestParams = { sourceId?: Id<Source> }
-export const createHarvestQuest: CreateQuest<HarvestQuestParams> = ({
-  id,
+export type UpgradeQuestParams = {}
+export const createUpgradeQuest: CreateQuest<UpgradeQuestParams> = ({
   town,
-  sourceId,
+  id,
 }) => {
   const objective: Objective = {
-    name: ObjectiveName.harvest,
-    target: sourceId || ObjectiveTargetEnum.source,
+    name: ObjectiveName.upgrade,
+    target: ObjectiveTargetEnum.controller,
   }
 
   const requirements: Requirement[] = [
     createHasBodyPartRequirement({ n: 1, type: WORK }),
     createHasBodyPartRequirement({ n: 1, type: CARRY }),
-    createHasCapacityRequirement({}),
+    createIsFullRequirement({}),
   ]
 
   return {
     id: id || v4(),
     town,
-    name: QuestNames.harvest,
+    name: QuestNames.upgrade,
     objective,
     requirements,
   }
 }
 
-export const canCompleteHarvestQuest: CanCompleteQuest = (
+export const canCompleteUpgradeQuest: CanCompleteQuest = (
   quest: Quest,
   creep: Creep,
 ) => {
-  return creep.store.getFreeCapacity() === 0
+  return creep.store.getUsedCapacity() === 0
 }

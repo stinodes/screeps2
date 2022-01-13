@@ -1,4 +1,3 @@
-import { Quest } from '../questTypes'
 import {
   HasBodyPartRequirement,
   meetsBodyRequirement,
@@ -7,12 +6,13 @@ import {
   HasCapacityRequirement,
   meetsCapacityRequirement,
 } from './hasCapacityRequirement'
+import { IsFullRequirement, meetsIsFullRequirement } from './isFullRequirement'
 import { Requirement } from './requirementTypes'
 
 export enum RequirementNames {
-  hasBodyPart,
-  hasCapacity,
-  isFull,
+  hasBodyPart = 'hasBodyPart',
+  hasCapacity = 'hasCapacity',
+  isFull = 'isFull',
 }
 
 export const meetsRequirement = (requirement: Requirement, creep: Creep) => {
@@ -24,6 +24,8 @@ export const meetsRequirement = (requirement: Requirement, creep: Creep) => {
         requirement as HasCapacityRequirement,
         creep,
       )
+    case RequirementNames.isFull:
+      return meetsIsFullRequirement(requirement as IsFullRequirement, creep)
     default:
       return true
   }

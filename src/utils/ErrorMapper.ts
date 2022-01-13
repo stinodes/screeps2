@@ -78,9 +78,11 @@ export class ErrorMapper {
           if ('sim' in Game.rooms) {
             const message = `Source maps don't work in the simulator - displaying original error`
             console.log(
-              `<span style='color:red'>${message}<br>${_.escape(
-                e.stack,
-              )}</span>`,
+              `<span style='color:red'>
+${message}<br>
+${e}<br>
+${_.escape(e.stack)}
+</span>`,
             )
           } else {
             console.log(

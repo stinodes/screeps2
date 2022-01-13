@@ -1,11 +1,34 @@
-import { canCompleteFillQuest } from './fill'
-import { canCompleteHarvestQuest } from './harvest'
-import { CanCompleteQuest, CanPickUpQuest, Quest } from './questTypes'
+import { canCompleteFillQuest, createFillQuest } from './fill'
+import { canCompleteHarvestQuest, createHarvestQuest } from './harvest'
+import {
+  BaseQuestParams,
+  CanCompleteQuest,
+  CanPickUpQuest,
+  Quest,
+} from './questTypes'
 import { meetsRequirement } from './requirements'
+import { canCompleteUpgradeQuest, createUpgradeQuest } from './upgrade'
 
 export enum QuestNames {
-  harvest,
-  fill,
+  harvest = 'harvest',
+  fill = 'fill',
+  upgrade = 'upgrade',
+}
+
+export const createQuest = <Params extends BaseQuestParams>(
+  name: QuestNames,
+  params: Params,
+) => {
+  switch (name) {
+    case QuestNames.fill:
+      return createFillQuest(params)
+    case QuestNames.harvest:
+      return createHarvestQuest(params)
+    case QuestNames.upgrade:
+      return createUpgradeQuest(params)
+    default:
+      return null
+  }
 }
 
 // Return:
@@ -29,17 +52,25 @@ export const canCompleteQuest: CanCompleteQuest = (
       return canCompleteHarvestQuest(quest, creep)
     case QuestNames.fill:
       return canCompleteFillQuest(quest, creep)
+    case QuestNames.upgrade:
+      return canCompleteUpgradeQuest(quest, creep)
     default:
       return true
   }
 }
 
 export const currentQuestTask = (quest: Quest, creep: Creep) => {
+  if (!quest) return null
   const canPickUp = canPickUpQuest(quest, creep)
   if (!canPickUp) return null
   if (canPickUp === true) return quest
-  const nextTask = canPickUp.find(req => req.fulfillableBy)
-  return null
+
+  const requirement = canPickUp.find(req => req.fulfillableBy)
+  if (!requirement) return null
+
+  const nextTask = requirement.fulfillableBy && requirement.fulfillableBy[0]
+
+  return nextTask ? createQuest(nextTask, { town: quest.town }) : null
 }
 
 export * from './selectors'

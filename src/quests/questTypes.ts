@@ -2,27 +2,28 @@ import { QuestNames } from 'quests'
 import { Requirement } from './requirements/requirementTypes'
 
 export enum ObjectiveName {
-  pickUp,
-  harvest,
-  transfer,
-  upgrade,
-  repair,
+  pickUp = 'pickUp',
+  harvest = 'harvest',
+  transfer = 'transfer',
+  upgrade = 'upgrade',
+  repair = 'repair',
 }
 export enum ObjectiveTargetEnum {
-  structure,
-  tower,
-  extension,
-  spawn,
-  storage,
-  container,
-  store,
+  structure = 'structure',
+  tower = 'tower',
+  extension = 'extension',
+  spawn = 'spawn',
+  storage = 'storage',
+  container = 'container',
+  store = 'store',
+  controller = 'controller',
 
-  road,
-  wall,
+  road = 'road',
+  wall = 'wall',
 
-  constructionSite,
-  source,
-  resource,
+  constructionSite = 'constructionSite',
+  source = 'source',
+  resource = 'resource',
 }
 
 export type Quest = {
@@ -41,8 +42,9 @@ export type Objective<Type = any> = {
   target: ObjectiveTarget<Type>
 }
 
+export type BaseQuestParams = { id?: string; town: string }
 export type CreateQuest<Params extends {}> = (
-  params: Params & { id?: string; town: string },
+  params: Params & BaseQuestParams,
 ) => Quest
 export type CanPickUpQuest = (
   quest: Quest,

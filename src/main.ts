@@ -1,7 +1,7 @@
 import { Manager } from 'managers/managerTypes'
 import { Quest } from 'quests'
 import { createTown, town } from 'town'
-import { Town } from 'town/TownTypes'
+import { Town } from 'town/townTypes'
 import { ErrorMapper } from 'utils/ErrorMapper'
 
 declare global {
@@ -57,7 +57,7 @@ const setup = () => {
 export const loop = ErrorMapper.wrapLoop(() => {
   console.log(`Current game tick is ${Game.time}`)
 
-  if (!Object.values(Memory.towns).length) {
+  if (!Memory.towns || !Object.values(Memory.towns).length) {
     setup()
   }
 

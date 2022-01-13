@@ -1,4 +1,9 @@
-import { ObjectiveName, ObjectiveTarget } from 'quests'
+import {
+  currentQuestTask,
+  getQuest,
+  ObjectiveName,
+  ObjectiveTarget,
+} from 'quests'
 import { getVillagerCreep } from './selectors'
 import { getTarget } from './target'
 
@@ -20,16 +25,38 @@ const transfer = (creep: Creep, target: ObjectiveTarget<AnyStoreStructure>) => {
   return result
 }
 
+const upgrade = (creep: Creep) => {
+  const controller = creep.room.controller
+  if (!controller) return
+  creep.say('🔋')
+  const result = creep.upgradeController(controller)
+  if (result === ERR_NOT_IN_RANGE) return creep.moveTo(controller)
+  return result
+}
+
 export const villager = (villager: CreepMemory) => {
+  console.log('Executing villager ' + villager.name)
+
   const creep = getVillagerCreep(villager.name)
-  const quest = Memory.quests[_.last(creep.memory.questDependencyQueue)]
-  const currentObjective = quest.objective
+  const quest = getQuest(villager.questId)
+  const currentQuest = currentQuestTask(quest, creep)
+
+  console.log('current quest: ', currentQuest?.name)
+
+  if (!currentQuest) return
+
+  const currentObjective = currentQuest.objective
 
   switch (currentObjective.name) {
     case ObjectiveName.harvest:
       harvest(creep, currentObjective.target)
+      break
     case ObjectiveName.transfer:
       transfer(creep, currentObjective.target)
+      break
+    case ObjectiveName.upgrade:
+      upgrade(creep)
+      break
     default:
       creep.say('💤')
   }

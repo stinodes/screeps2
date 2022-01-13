@@ -5,7 +5,6 @@ import {
   CreateQuest,
   Objective,
   ObjectiveName,
-  ObjectiveTarget,
   ObjectiveTargetEnum,
   Quest,
 } from './questTypes'
@@ -13,10 +12,14 @@ import { Requirement } from './requirements'
 import { createHasBodyPartRequirement } from './requirements/hasBodyPartRequirement'
 import { createIsFullRequirement } from './requirements/isFullRequirement'
 
-export const createFillQuest: CreateQuest<{
+export type FillQuestParams = {
   structureId?: Id<AnyStoreStructure>
-  town: string
-}> = ({ structureId, town, id }) => {
+}
+export const createFillQuest: CreateQuest<FillQuestParams> = ({
+  structureId,
+  town,
+  id,
+}) => {
   const objective: Objective = {
     name: ObjectiveName.transfer,
     target: structureId || ObjectiveTargetEnum.store,

@@ -5,7 +5,7 @@ export const getTarget = <Type extends any>(
   target: ObjectiveTarget<Type>,
 ): null | Type => {
   const targetObject =
-    typeof target === 'string' ? Game.getObjectById(target) : null
+    typeof target === 'string' ? Game.getObjectById<Type>(target) : null
 
   if (targetObject) return targetObject
 

@@ -23,5 +23,5 @@ export const createHasCapacityRequirement: CreateRequirement<
 export const meetsCapacityRequirement: MeetsRequirement<
   HasCapacityRequirement
 > = (requirement, creep) => {
-  return creep.store.getFreeCapacity() > 0
+  return creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0
 }

@@ -1,9 +1,12 @@
-import { ObjectiveName } from 'quests'
+import { getQuestsForTown, ObjectiveName, QuestNames } from 'quests'
 import { createFillQuest } from 'quests/fill'
+import { createUpgradeQuest } from 'quests/upgrade'
 import { Manager } from './managerTypes'
 
 export const resourceManager = (manager: Manager) => {
   const room = Game.rooms[manager.town]
+
+  const townQuests = getQuestsForTown(room.name)
 
   const storesWithoutQuest = room.find(FIND_MY_STRUCTURES, {
     filter: struct =>
@@ -18,11 +21,20 @@ export const resourceManager = (manager: Manager) => {
       ),
   }) as AnyStoreStructure[]
 
-  const quests = storesWithoutQuest.map(struct => {
-    const quest = createFillQuest({ structureId: struct.id })
+  const newStoreQuests = storesWithoutQuest.map(struct => {
+    const quest = createFillQuest({
+      town: manager.town,
+      structureId: struct.id,
+    })
     quest.priority = 2
     return quest
   })
-  console.log(`Creating ${quests.length} new resource quests`)
-  quests.forEach(quest => (Memory.quests[quest.id] = quest))
+  console.log(`Creating ${newStoreQuests.length} new resource quests`)
+  newStoreQuests.forEach(quest => (Memory.quests[quest.id] = quest))
+
+  const newUpgradeQuest = !townQuests.some(q => q.name === QuestNames.upgrade)
+    ? createUpgradeQuest({ town: room.name })
+    : null
+  console.log(`Creating ${newUpgradeQuest ? 1 : 0} new upgrade quests`)
+  if (newUpgradeQuest) Memory.quests[newUpgradeQuest.id] = newUpgradeQuest
 }
