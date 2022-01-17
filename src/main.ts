@@ -1,7 +1,6 @@
-import { Manager } from 'managers/managerTypes'
-import { Quest } from 'quests'
-import { createTown, town } from 'town'
-import { Town } from 'town/townTypes'
+import { Spooders } from 'creeps'
+import { createNest, nest } from 'nest'
+import { Nest } from 'nest/types'
 import { ErrorMapper } from 'utils/ErrorMapper'
 
 declare global {
@@ -15,24 +14,18 @@ declare global {
   */
   // Memory extension samples
   interface Memory {
-    quests: {
-      [id: string]: Quest
-    }
-    managers: {
-      [id: string]: Manager
-    }
-    towns: {
-      [name: string]: Town
+    nests: {
+      [name: string]: Nest
     }
     uuid: number
     log: any
   }
 
   interface CreepMemory {
-    questId: string
-    questDependencyQueue: string[]
     name: string
-    town: string
+    behavior: Spooders
+    nest: string
+    goal: string
   }
 
   // Syntax for adding proprties to `global` (ex "global.log")
@@ -44,12 +37,13 @@ declare global {
 }
 
 const setup = () => {
-  Memory.quests = {}
-  Memory.managers = {}
-  Memory.towns = {}
+  Object.keys(Memory).forEach(key => {
+    delete (Memory as { [name: string]: any })[key]
+  })
+  Memory.nests = {}
   Memory.creeps = {}
-  const newTown = createTown(Object.values(Game.spawns)[0].room.name)
-  if (newTown) Memory.towns[newTown.room] = newTown
+  const nest = createNest(Object.values(Game.spawns)[0].room.name)
+  if (nest) Memory.nests[nest.name] = nest
 }
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
@@ -57,11 +51,11 @@ const setup = () => {
 export const loop = ErrorMapper.wrapLoop(() => {
   console.log(`Current game tick is ${Game.time}`)
 
-  if (!Memory.towns || !Object.values(Memory.towns).length) {
+  if (!Memory.nests || !Object.values(Memory.nests).length) {
     setup()
   }
 
-  Object.values(Memory.towns).forEach(town)
+  Object.values(Memory.nests).forEach(nest)
 
   // Automatically delete memory of missing creeps
   for (const name in Memory.creeps) {
