@@ -1,5 +1,5 @@
-import { Spooders } from 'creeps'
-import { GoalNames } from 'nest'
+import {Spooders} from 'creeps'
+import {GoalNames} from 'nest'
 
 export type Nest = {
   name: string
@@ -18,6 +18,7 @@ export type Goal = {
   name: GoalNames
   canCreate: CanCreate
   isComplete: IsComplete
-  requestJobs: RequestJobs
+  eggs: RequestJobs
+
   run: Run
 }

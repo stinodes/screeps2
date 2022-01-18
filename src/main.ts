@@ -1,7 +1,7 @@
-import { Spooders } from 'creeps'
-import { createNest, nest } from 'nest'
-import { Nest } from 'nest/types'
-import { ErrorMapper } from 'utils/ErrorMapper'
+import {Spooders} from 'creeps'
+import {createNest, nest} from 'nest'
+import {Nest} from 'nest/types'
+import {ErrorMapper} from 'utils/ErrorMapper'
 
 declare global {
   /*
@@ -23,7 +23,7 @@ declare global {
 
   interface CreepMemory {
     name: string
-    behavior: Spooders
+    type: Spooders
     nest: string
     goal: string
   }
@@ -38,7 +38,7 @@ declare global {
 
 const setup = () => {
   Object.keys(Memory).forEach(key => {
-    delete (Memory as { [name: string]: any })[key]
+    delete (Memory as {[name: string]: any})[key]
   })
   Memory.nests = {}
   Memory.creeps = {}
