@@ -1,6 +1,6 @@
-import {Spooders} from 'creeps'
-import {creepForName} from './helpers'
-import {harvest, store, Task, TaskNames, upgrade, weave} from './tasks'
+import { Spooders } from 'creeps'
+import { creepForName } from './helpers'
+import { harvest, store, Task, TaskNames, upgrade, weave } from './tasks'
 
 export type SpiderlingTask =
   | Task<TaskNames.harvest, Source>
@@ -12,9 +12,14 @@ export type Spiderling = CreepMemory & {
   type: Spooders.spiderling
 
   task: SpiderlingTask
+
+  data?: {
+    upgrader?: boolean
+    source?: Id<Source>
+  }
 }
 
-export const spiderling = ({name, task}: Spiderling) => {
+export const spiderling = ({ name, task }: Spiderling) => {
   const creep = creepForName(name)
 
   switch (task?.name) {
@@ -27,7 +32,7 @@ export const spiderling = ({name, task}: Spiderling) => {
     case TaskNames.upgrade:
       return upgrade(creep, task)
     default:
-      (task as Task<any, any>).complete = true
+      ;(task as Task<any, any>).complete = true
       return task
   }
 }

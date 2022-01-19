@@ -1,4 +1,9 @@
-import {creepBuild, creepHarvest, creepTransfer, creepUpgrade} from "./helpers"
+import {
+  creepBuild,
+  creepHarvest,
+  creepTransfer,
+  creepUpgrade,
+} from './helpers'
 
 export enum TaskNames {
   harvest = 'harvest',
@@ -14,25 +19,33 @@ export type Task<Name extends TaskNames, Target> = {
   complete?: boolean
 }
 
-export const harvest = (creep: Creep, task: Task<TaskNames.harvest, Source>) => {
+export const harvest = (
+  creep: Creep,
+  task: Task<TaskNames.harvest, Source>,
+) => {
   const target = Game.getObjectById(task.target)
   if (target && creep.store.getFreeCapacity() !== 0) {
     task.progress = true
     creepHarvest(creep, target)
-  }
-  else {
+  } else {
     task.complete = true
   }
   return task
 }
 
-export const store = (creep: Creep, task: Task<TaskNames.store, AnyStoreStructure>) => {
+export const store = (
+  creep: Creep,
+  task: Task<TaskNames.store, AnyStoreStructure>,
+) => {
   const target = Game.getObjectById(task.target)
-  if (target && creep.store.getUsedCapacity() !== 0 && target.store.getFreeCapacity() !== 0) {
+  if (
+    target &&
+    creep.store.getUsedCapacity() !== 0 &&
+    target.store.getFreeCapacity() !== 0
+  ) {
     task.progress = true
     creepTransfer(creep, target)
-  }
-  else {
+  } else {
     task.complete = true
   }
   return task
@@ -40,25 +53,29 @@ export const store = (creep: Creep, task: Task<TaskNames.store, AnyStoreStructur
 
 export const upgrade = (creep: Creep, task: Task<TaskNames.upgrade, any>) => {
   const target = Game.getObjectById(task.target)
-  if (target && creep.store.getUsedCapacity() !== 0) {
+  if (creep.store.getUsedCapacity() !== 0) {
     task.progress = true
     creepUpgrade(creep)
-  }
-  else {
+  } else {
     task.complete = true
   }
   return task
 }
 
-export const weave = (creep: Creep, task: Task<TaskNames.weave, ConstructionSite>) => {
+export const weave = (
+  creep: Creep,
+  task: Task<TaskNames.weave, ConstructionSite>,
+) => {
   const target = Game.getObjectById(task.target)
-  if (target && creep.store.getUsedCapacity() !== 0 && target.progress < target.progressTotal) {
+  if (
+    target &&
+    creep.store.getUsedCapacity() !== 0 &&
+    target.progress < target.progressTotal
+  ) {
     task.progress = true
     creepBuild(creep, target)
-  }
-  else {
+  } else {
     task.complete = true
   }
   return task
-
 }

@@ -1,4 +1,4 @@
-import {Spooders} from 'creeps'
+import { Egg, Spooders } from 'creeps'
 
 export enum GoalNames {
   startUp = 'startUp',
@@ -15,7 +15,7 @@ export type GoalState = {
 
 type CanCreate = (nest: string) => boolean
 type IsComplete = (nest: string) => boolean
-type RequestJobs = (nest: string) => Spooders[]
+type RequestJobs = (nest: string) => Egg[]
 type Run = (nest: string) => any
 export type Goal = {
   name: GoalNames

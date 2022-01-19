@@ -1,19 +1,17 @@
-import {Spooders} from 'creeps'
-import {v4} from 'uuid'
-import {nestRoom} from './helpers'
-import {startUpGoal} from './startUpGoal'
-import {Goal, GoalNames, Nest} from './types'
+import { Egg, Spooders } from 'creeps'
+import { v4 } from 'uuid'
+import { nestRoom } from './helpers'
+import { startUpGoal } from './startUpGoal'
+import { Goal, GoalNames, Nest } from './types'
 
 export const createNest = (room: string): Nest => ({
   name: room,
 })
 
-const goals: {[nest: string]: Goal[]} = {}
+const goals: { [nest: string]: Goal[] } = {}
 const getGoals = (nestName: string) => {
   if (!goals[nestName]) {
-    goals[nestName] = [
-      startUpGoal
-    ]
+    goals[nestName] = [startUpGoal]
   }
   return goals[nestName]
 }
@@ -24,17 +22,23 @@ const hatchEggs = (nest: Nest) => {
 
   const eggQueue = goals.reduce((prev, goal) => {
     const eggs = goal.eggs(nest.name)
-    return prev.concat(eggs.map(egg => ({goal: goal.name, egg: egg})))
-  }, [] as {goal: GoalNames; egg: Spooders}[])
+    return prev.concat(eggs.map(egg => ({ goal: goal.name, egg: egg })))
+  }, [] as { goal: GoalNames; egg: Egg }[])
 
-  eggQueue.some(({egg, goal}) => {
-    const name = `${egg}-${v4()}`
+  eggQueue.some(({ egg, goal }) => {
+    const name = `${egg.type}-${v4()}`
 
     return (
       spawns
         .find(spawn => !spawn.spawning)
         ?.spawnCreep([WORK, WORK, CARRY, MOVE], name, {
-          memory: {name, goal, type: egg, nest: nest.name},
+          memory: {
+            name,
+            goal,
+            type: egg.type,
+            nest: nest.name,
+            data: egg.data,
+          },
         }) !== OK
     )
   })

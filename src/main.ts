@@ -1,7 +1,7 @@
-import {Spooders} from 'creeps'
-import {createNest, nest} from 'nest'
-import {Nest} from 'nest/types'
-import {ErrorMapper} from 'utils/ErrorMapper'
+import { Spooders } from 'creeps'
+import { createNest, nest } from 'nest'
+import { Nest } from 'nest/types'
+import { ErrorMapper } from 'utils/ErrorMapper'
 
 declare global {
   /*
@@ -26,6 +26,7 @@ declare global {
     type: Spooders
     nest: string
     goal: string
+    data?: {}
   }
 
   // Syntax for adding proprties to `global` (ex "global.log")
@@ -38,7 +39,7 @@ declare global {
 
 const setup = () => {
   Object.keys(Memory).forEach(key => {
-    delete (Memory as {[name: string]: any})[key]
+    delete (Memory as { [name: string]: any })[key]
   })
   Memory.nests = {}
   Memory.creeps = {}
