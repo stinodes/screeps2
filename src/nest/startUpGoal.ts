@@ -2,9 +2,8 @@ import {Spooders} from 'creeps'
 import {creepForName, isCreepEmpty} from 'creeps/helpers'
 import {Spiderling, spiderling, SpiderlingTask} from 'creeps/spiderling'
 import {TaskNames} from 'creeps/tasks'
-import {GoalNames} from 'nest'
 import {nestFind, nestGoalSpoods, nestLevel, oneOfStructures} from './helpers'
-import {Goal} from './types'
+import {GoalNames, Goal} from './types'
 
 export const startUpGoal: Goal = {
   name: GoalNames.startUp,
@@ -28,7 +27,7 @@ export const startUpGoal: Goal = {
   run: (nest: string) => {
     const spoods = nestGoalSpoods(nest, GoalNames.startUp)
     const spiderlings = spoods.filter(s => s.type === Spooders.spiderling) as Spiderling[]
-    const spiderlingsWithCompleteTask = spiderlings.filter(s => s.task.complete)
+    const spiderlingsWithCompleteTask = spiderlings.filter(s => !s.task || s.task.complete)
 
     const unfilledStores = nestFind(nest, FIND_STRUCTURES, {
       filter: (struct: AnyStoreStructure) =>
@@ -53,7 +52,7 @@ export const startUpGoal: Goal = {
     }
 
     spiderlingsWithCompleteTask.forEach(s => {
-      if (s.task.name === TaskNames.harvest) {
+      if (s.task && s.task.name === TaskNames.harvest) {
         s.task = createNewSpiderlingTask()
       }
       else {

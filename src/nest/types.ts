@@ -1,5 +1,8 @@
 import {Spooders} from 'creeps'
-import {GoalNames} from 'nest'
+
+export enum GoalNames {
+  startUp = 'startUp',
+}
 
 export type Nest = {
   name: string
