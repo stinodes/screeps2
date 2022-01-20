@@ -6,6 +6,7 @@ import { Goal, GoalNames, Nest } from './types'
 
 export const createNest = (room: string): Nest => ({
   name: room,
+  hooks: {},
 })
 
 const goals: { [nest: string]: Goal[] } = {}

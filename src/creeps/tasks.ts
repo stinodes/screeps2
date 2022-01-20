@@ -24,7 +24,7 @@ export const harvest = (
   task: Task<TaskNames.harvest, Source>,
 ) => {
   const target = Game.getObjectById(task.target)
-  if (target && creep.store.getFreeCapacity() !== 0) {
+  if (target && creep.store.getFreeCapacity(RESOURCE_ENERGY)) {
     task.progress = true
     creepHarvest(creep, target)
   } else {
@@ -40,8 +40,8 @@ export const store = (
   const target = Game.getObjectById(task.target)
   if (
     target &&
-    creep.store.getUsedCapacity() !== 0 &&
-    target.store.getFreeCapacity() !== 0
+    creep.store.getUsedCapacity(RESOURCE_ENERGY) &&
+    target.store.getFreeCapacity(RESOURCE_ENERGY)
   ) {
     task.progress = true
     creepTransfer(creep, target)
@@ -53,7 +53,7 @@ export const store = (
 
 export const upgrade = (creep: Creep, task: Task<TaskNames.upgrade, any>) => {
   const target = Game.getObjectById(task.target)
-  if (creep.store.getUsedCapacity() !== 0) {
+  if (creep.store.getUsedCapacity(RESOURCE_ENERGY)) {
     task.progress = true
     creepUpgrade(creep)
   } else {
@@ -69,7 +69,7 @@ export const weave = (
   const target = Game.getObjectById(task.target)
   if (
     target &&
-    creep.store.getUsedCapacity() !== 0 &&
+    creep.store.getUsedCapacity(RESOURCE_ENERGY) &&
     target.progress < target.progressTotal
   ) {
     task.progress = true

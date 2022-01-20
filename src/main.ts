@@ -1,4 +1,5 @@
 import { Spooders } from 'creeps'
+import { Task } from 'creeps/tasks'
 import { createNest, nest } from 'nest'
 import { Nest } from 'nest/types'
 import { ErrorMapper } from 'utils/ErrorMapper'
@@ -56,12 +57,12 @@ export const loop = ErrorMapper.wrapLoop(() => {
     setup()
   }
 
-  Object.values(Memory.nests).forEach(nest)
-
   // Automatically delete memory of missing creeps
   for (const name in Memory.creeps) {
     if (!(name in Game.creeps)) {
       delete Memory.creeps[name]
     }
   }
+
+  Object.values(Memory.nests).forEach(nest)
 })

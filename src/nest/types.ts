@@ -6,6 +6,13 @@ export enum GoalNames {
 
 export type Nest = {
   name: string
+
+  hooks: {
+    [GoalNames.startUp]?: {
+      initRoads?: boolean
+      initExtensions?: boolean
+    }
+  }
 }
 
 export type GoalState = {
