@@ -2,6 +2,11 @@ import { GoalNames } from './types'
 
 export const nestMem = (nest: string) => Memory.nests[nest]
 
+export const nestGoalData = (nest: string, goal: GoalNames) => {
+  if (!Memory.nests[nest].data[goal]) Memory.nests[nest].data[goal] = {}
+  return Memory.nests[nest].data[goal]
+}
+
 export const nestRoom = (nest: string) => Game.rooms[nest]
 
 export const nestLevel = (nest: string) => nestRoom(nest).controller?.level || 0
@@ -22,9 +27,6 @@ export const nestGoalSpoods = (nest: string, goal: string) =>
   Object.values(Memory.creeps).filter(
     spood => spood.nest === nest && spood.goal === goal,
   )
-
-export const nestHooksForGoal = (nest: string, goal: GoalNames) =>
-  Memory.nests[nest]?.hooks[goal]
 
 export const oneOfStructures = <
   S extends AnyStructure,

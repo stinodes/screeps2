@@ -1,6 +1,8 @@
 export enum Spooders {
   spiderling = 'spiderling',
-  coreWeavers = 'core-weavers',
+  coreWeaver = 'core-weaver',
+  hunter = 'hunter',
+  carrier = 'carrier',
 }
 
 export type Egg = {

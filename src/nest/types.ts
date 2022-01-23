@@ -1,17 +1,18 @@
 import { Egg, Spooders } from 'creeps'
+import { HuntingData } from './huntingGoal/hooks'
+import { StartUpData } from './startUpGoal/hooks'
 
 export enum GoalNames {
   startUp = 'startUp',
+  hunting = 'hunting',
 }
 
 export type Nest = {
   name: string
 
-  hooks: {
-    [GoalNames.startUp]?: {
-      initRoads?: boolean
-      initExtensions?: boolean
-    }
+  data: {
+    [GoalNames.startUp]?: StartUpData
+    [GoalNames.hunting]?: HuntingData
   }
 }
 

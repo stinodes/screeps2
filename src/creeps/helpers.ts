@@ -1,10 +1,16 @@
 export const creepForName = (name: string) => Game.creeps[name]
-export const isCreepEmpty = (name: string, type: ResourceConstant = RESOURCE_ENERGY) => creepForName(name).store.getUsedCapacity(type) === 0
-export const isCreepFull = (name: string, type: ResourceConstant = RESOURCE_ENERGY) => creepForName(name).store.getFreeCapacity(type) === 0
+export const isCreepEmpty = (
+  name: string,
+  type: ResourceConstant = RESOURCE_ENERGY,
+) => creepForName(name).store.getUsedCapacity(type) === 0
+export const isCreepFull = (
+  name: string,
+  type: ResourceConstant = RESOURCE_ENERGY,
+) => creepForName(name).store.getFreeCapacity(type) === 0
 
 export const creepHarvest = (creep: Creep, source: Source) => {
   if (!source) return
-  creep.say('⛏️')
+  creep.say('🪰')
   const result = creep.harvest(source)
   if (result === ERR_NOT_IN_RANGE) return creep.moveTo(source)
   return result
@@ -32,5 +38,23 @@ export const creepUpgrade = (creep: Creep) => {
   creep.say('🔋')
   const result = creep.upgradeController(controller)
   if (result === ERR_NOT_IN_RANGE) return creep.moveTo(controller)
+  return result
+}
+
+export const creepPickUp = (creep: Creep, resource: Resource) => {
+  creep.say('🪰')
+  const result = creep.pickup(resource)
+  if (result === ERR_NOT_IN_RANGE) return creep.moveTo(resource)
+  return result
+}
+
+export const creepWithdraw = (
+  creep: Creep,
+  store: AnyStoreStructure,
+  resource: ResourceConstant = RESOURCE_ENERGY,
+) => {
+  creep.say('🪰')
+  const result = creep.withdraw(store, resource)
+  if (result === ERR_NOT_IN_RANGE) return creep.moveTo(store)
   return result
 }

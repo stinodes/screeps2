@@ -1,29 +1,21 @@
-import {
-  nestFind,
-  nestHooksForGoal,
-  nestMem,
-  relativePosCurry,
-} from 'nest/helpers'
+import { nestFind, nestGoalData, nestMem, relativePosCurry } from 'nest/helpers'
 import { GoalNames } from 'nest/types'
 import { startUpGoal } from '.'
 
-export type StartUpHooks = {
+export type StartUpData = {
   initRoads?: boolean
   initExtensions?: boolean
 }
 
 export const hooks = (nest: string) => {
-  const nestObj = nestMem(nest)
-  if (!nestObj.hooks[startUpGoal.name]) {
-    nestObj.hooks[startUpGoal.name] = {}
-  }
+  const nestObj = nestGoalData(nest, GoalNames.startUp)
   buildRoads(nest)
 }
 
 const buildRoads = (nest: string) => {
   const maxRoadLength = 10
-  const startUpHooks = nestHooksForGoal(nest, GoalNames.startUp)
-  if (startUpHooks && !startUpHooks.initRoads) {
+  const startUpHooks = nestGoalData(nest, GoalNames.startUp) as StartUpData
+  if (!startUpHooks.initRoads) {
     const spawn = nestFind(nest, FIND_MY_SPAWNS)[0]
 
     /*

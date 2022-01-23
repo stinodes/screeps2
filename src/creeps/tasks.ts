@@ -1,20 +1,24 @@
 import {
   creepBuild,
   creepHarvest,
+  creepPickUp,
   creepTransfer,
   creepUpgrade,
+  creepWithdraw,
 } from './helpers'
 
 export enum TaskNames {
   harvest = 'harvest',
   store = 'store',
+  pickUp = 'pickUp',
+  withdraw = 'withdraw',
   upgrade = 'upgrade',
   weave = 'weave',
 }
 
-export type Task<Name extends TaskNames, Target> = {
+export type Task<Name extends TaskNames, TargetId> = {
   name: Name
-  target: Id<Target>
+  target: Id<TargetId>
   progress?: boolean
   complete?: boolean
 }
@@ -74,6 +78,38 @@ export const weave = (
   ) {
     task.progress = true
     creepBuild(creep, target)
+  } else {
+    task.complete = true
+  }
+  return task
+}
+
+export const pickUp = (
+  creep: Creep,
+  task: Task<TaskNames.pickUp, Resource>,
+) => {
+  const resource = Game.getObjectById(task.target)
+  if (resource && resource.amount < 0 && creep.store.getFreeCapacity() > 0) {
+    task.progress = true
+    creepPickUp(creep, resource)
+  } else {
+    task.complete = true
+  }
+  return task
+}
+
+export const withdraw = (
+  creep: Creep,
+  task: Task<TaskNames.withdraw, AnyStoreStructure>,
+) => {
+  const store = Game.getObjectById(task.target)
+  if (
+    store &&
+    store.store.getUsedCapacity(RESOURCE_ENERGY) > 0 &&
+    creep.store.getFreeCapacity() > 0
+  ) {
+    task.progress = true
+    creepWithdraw(creep, store)
   } else {
     task.complete = true
   }
