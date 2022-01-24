@@ -1,13 +1,28 @@
-import { Egg, Spooders } from 'creeps'
+import { Egg } from 'creeps'
+import { serializePos } from 'utils/helpers'
 import { v4 } from 'uuid'
-import { nestRoom } from './helpers'
+import { nestRoom, relativePos } from './helpers'
 import { startUpGoal } from './startUpGoal'
 import { Goal, GoalNames, Nest } from './types'
 
-export const createNest = (room: string): Nest => ({
-  name: room,
-  hooks: {},
-})
+export const createNest = (roomName: string): Nest => {
+  const room = Game.rooms[roomName]
+  const spawn = room.find(FIND_STRUCTURES, {
+    filter: { structureType: STRUCTURE_SPAWN },
+  })[0]
+  const markers: Nest['markers'] = {}
+
+  if (spawn) markers.hatchery = serializePos(spawn.pos)
+  if (spawn) markers.storage = serializePos(relativePos(spawn.pos, 0, -2))
+
+  return {
+    name: roomName,
+    [GoalNames.startUp]: {},
+    [GoalNames.hunting]: {},
+
+    markers,
+  }
+}
 
 const goals: { [nest: string]: Goal[] } = {}
 const getGoals = (nestName: string) => {

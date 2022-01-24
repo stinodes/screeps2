@@ -1,10 +1,10 @@
 import { Egg, Spooders } from 'creeps'
-import { carrier, Carrier } from 'creeps/carrier'
-import { hunter, Hunter } from 'creeps/hunter'
+import { Carrier } from 'creeps/carrier'
+import { Hunter } from 'creeps/hunter'
 import { nestGoalData, nestSpoods } from 'nest/helpers'
 import { Goal, GoalNames } from 'nest/types'
-import { serializePos } from 'utils/helpers'
 import { HuntingData } from './hooks'
+import { run } from './run'
 
 export const huntingGoal: Goal = {
   name: GoalNames.hunting,
@@ -40,18 +40,5 @@ export const huntingGoal: Goal = {
     return eggs
   },
 
-  run: nest => {
-    const spoods = nestSpoods(nest)
-
-    spoods.forEach(s => {
-      switch (s.type) {
-        case Spooders.hunter:
-          hunter(s as Hunter)
-          break
-        case Spooders.carrier:
-          carrier(s as Carrier)
-          break
-      }
-    })
-  },
+  run,
 }

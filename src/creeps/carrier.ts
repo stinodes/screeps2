@@ -7,6 +7,7 @@ export type CarrierTask =
   | Task<TaskNames.store, AnyStoreStructure>
   | Task<TaskNames.withdraw, AnyStoreStructure>
   | Task<TaskNames.pickUp, Resource>
+  | Task<TaskNames.drop, null, string>
 
 export type Carrier = CreepMemory & {
   type: Spooders.carrier

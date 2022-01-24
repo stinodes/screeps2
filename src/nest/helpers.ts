@@ -3,9 +3,12 @@ import { GoalNames } from './types'
 export const nestMem = (nest: string) => Memory.nests[nest]
 
 export const nestGoalData = (nest: string, goal: GoalNames) => {
-  if (!Memory.nests[nest].data[goal]) Memory.nests[nest].data[goal] = {}
-  return Memory.nests[nest].data[goal]
+  if (!Memory.nests[nest][goal]) Memory.nests[nest][goal] = {}
+  return Memory.nests[nest][goal]
 }
+
+export const nestMarker = (nest: string, marker: string) =>
+  nestMem(nest).markers[marker]
 
 export const nestRoom = (nest: string) => Game.rooms[nest]
 
@@ -50,7 +53,6 @@ export const relativePosCurry =
     relativePos(pos, dx, dy)
 
 export const getAdjecentSquares = (pos: RoomPosition) => {
-  const room = Game.rooms[pos.roomName]
   const rpos = relativePosCurry(pos)
   return [
     rpos(-1, -1),
@@ -72,4 +74,15 @@ export const getEmptyAdjecentSquares = (pos: RoomPosition) => {
       TERRAIN_MASK_WALL
     )
   })
+}
+
+export const isObjectEmpty = (obj: Resource | AnyStoreStructure | null) => {
+  if (!obj) return true
+  if (obj instanceof Resource) {
+    return !obj.amount
+  }
+  if (obj instanceof Structure && obj.hasOwnProperty('store')) {
+    return !(obj as AnyStoreStructure).store.getUsedCapacity(RESOURCE_ENERGY)
+  }
+  return true
 }

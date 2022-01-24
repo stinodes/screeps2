@@ -1,8 +1,10 @@
 export const creepForName = (name: string) => Game.creeps[name]
+
 export const isCreepEmpty = (
   name: string,
   type: ResourceConstant = RESOURCE_ENERGY,
 ) => creepForName(name).store.getUsedCapacity(type) === 0
+
 export const isCreepFull = (
   name: string,
   type: ResourceConstant = RESOURCE_ENERGY,
@@ -21,6 +23,18 @@ export const creepTransfer = (creep: Creep, store: AnyStoreStructure) => {
   creep.say('🕷️')
   const result = creep.transfer(store, RESOURCE_ENERGY)
   if (result === ERR_NOT_IN_RANGE) return creep.moveTo(store)
+  return result
+}
+
+export const creepDrop = (creep: Creep, pos: RoomPosition) => {
+  if (!pos) return
+  creep.say('🕷️')
+
+  let result
+
+  if (creep.pos.getRangeTo(pos) === 0) {
+    result = creep.drop(RESOURCE_ENERGY)
+  } else result = creep.moveTo(pos)
   return result
 }
 

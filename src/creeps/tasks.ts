@@ -1,5 +1,7 @@
+import { deserializePos } from 'utils/helpers'
 import {
   creepBuild,
+  creepDrop,
   creepHarvest,
   creepPickUp,
   creepTransfer,
@@ -10,15 +12,16 @@ import {
 export enum TaskNames {
   harvest = 'harvest',
   store = 'store',
+  drop = 'drop',
   pickUp = 'pickUp',
   withdraw = 'withdraw',
   upgrade = 'upgrade',
   weave = 'weave',
 }
 
-export type Task<Name extends TaskNames, TargetId> = {
+export type Task<Name extends TaskNames, TargetId, Target = Id<TargetId>> = {
   name: Name
-  target: Id<TargetId>
+  target: Target
   progress?: boolean
   complete?: boolean
 }
@@ -49,6 +52,20 @@ export const store = (
   ) {
     task.progress = true
     creepTransfer(creep, target)
+  } else {
+    task.complete = true
+  }
+  return task
+}
+
+export const drop = (
+  creep: Creep,
+  task: Task<TaskNames.store, null, string>,
+) => {
+  const pos = deserializePos(task.target)
+  if (pos && !!creep.store.getUsedCapacity(RESOURCE_ENERGY)) {
+    task.progress = true
+    creepDrop(creep, pos)
   } else {
     task.complete = true
   }
