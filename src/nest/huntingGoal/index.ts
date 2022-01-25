@@ -13,9 +13,9 @@ export const huntingGoal: Goal = {
     const exts = nestFind(nest, FIND_STRUCTURES, {
       filter: { structureType: STRUCTURE_EXTENSION },
     })
-    return level > 2 && exts.length > 5
+    return level >= 2 && exts.length >= 5
   },
-  isComplete: (nest: string) => false,
+  isComplete: () => false,
 
   eggs: (nest: string) => {
     const eggs: Egg[] = []
@@ -31,17 +31,13 @@ export const huntingGoal: Goal = {
 
     if (!huntingGrounds || !huntingGrounds.length) return eggs
 
-    if (hunters.length !== huntingGrounds.length)
-      huntingGrounds.forEach(pos => {
-        if (!hunters.some(h => h.data?.huntingGround === pos))
-          eggs.push(layHunterEgg({ huntingGround: pos }))
-      })
+    huntingGrounds.forEach(hg => {
+      if (!hunters.some(h => h.data.huntingGround === hg))
+        eggs.push(layHunterEgg({ huntingGround: hg }))
 
-    if (carriers.length !== huntingGrounds.length)
-      huntingGrounds.forEach(pos => {
-        if (!carriers.some(h => h.data?.huntingGround === pos))
-          eggs.push(layCarrierEgg({ huntingGround: pos }))
-      })
+      if (!carriers.some(c => c.data?.huntingGround === hg))
+        eggs.push(layCarrierEgg({ huntingGround: hg }))
+    })
 
     return eggs
   },

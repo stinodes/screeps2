@@ -17,5 +17,5 @@ export const createBody = (b: Body, energy: number = 300) => {
 
   const partsPrice = partsArray.reduce((v, p) => v + BODYPART_COST[p], 0)
   const factor = Math.floor(energy / partsPrice)
-  return _.flatten(new Array(factor).fill(partsPrice))
+  return _.flatten(new Array(factor).fill(partsArray))
 }

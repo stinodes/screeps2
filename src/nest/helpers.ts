@@ -1,3 +1,4 @@
+import { Task } from 'creeps/tasks'
 import { GoalNames } from './types'
 
 export const nestMem = (nest: string) => Memory.nests[nest]
@@ -74,6 +75,18 @@ export const getEmptyAdjecentSquares = (pos: RoomPosition) => {
       TERRAIN_MASK_WALL
     )
   })
+}
+
+export const getFreeSources = (nest: string) => {
+  const room = nestRoom(nest)
+  const sources = room.find(FIND_SOURCES).filter(source => {
+    const adjSq = getEmptyAdjecentSquares(source.pos)
+    const spoods = (
+      nestSpoods(nest) as (CreepMemory & { task?: Task<any, any> })[]
+    ).filter(s => s.task?.target === source.id)
+    return spoods.length <= adjSq.length
+  })
+  return sources
 }
 
 export const isObjectEmpty = (obj: Resource | AnyStoreStructure | null) => {

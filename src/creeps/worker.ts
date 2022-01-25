@@ -10,17 +10,17 @@ import {
   weave,
 } from './tasks'
 
-export type SpiderlingTask =
+export type WorkerTask =
   | Task<TaskNames.harvest, Source>
   | Task<TaskNames.pickUp, Resource>
   | Task<TaskNames.store, AnyStoreStructure>
   | Task<TaskNames.upgrade, null>
   | Task<TaskNames.weave, ConstructionSite>
 
-export type Spiderling = CreepMemory & {
-  type: Spooders.spiderling
+export type Worker = CreepMemory & {
+  type: Spooders.worker
 
-  task: SpiderlingTask
+  task: WorkerTask
 
   data?: {
     upgrader?: boolean
@@ -28,8 +28,8 @@ export type Spiderling = CreepMemory & {
   }
 }
 
-export const laySpiderlingEgg: LayEgg<Spiderling['data']> = data => ({
-  type: Spooders.spiderling,
+export const layWorkerEgg: LayEgg<Worker['data']> = data => ({
+  type: Spooders.worker,
   body: {
     parts: {
       [WORK]: 2,
@@ -40,7 +40,7 @@ export const laySpiderlingEgg: LayEgg<Spiderling['data']> = data => ({
   data: data,
 })
 
-export const spiderling = ({ name, task }: Spiderling) => {
+export const worker = ({ name, task }: Worker) => {
   const creep = creepForName(name)
 
   switch (task?.name) {

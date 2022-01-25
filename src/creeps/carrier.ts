@@ -21,8 +21,8 @@ export const layCarrierEgg: LayEgg<Carrier['data']> = data => ({
   type: Spooders.carrier,
   body: {
     parts: {
-      [CARRY]: 5,
-      [MOVE]: 6,
+      [CARRY]: 7,
+      [MOVE]: 4,
     },
     grow: true,
   },

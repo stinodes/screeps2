@@ -4,6 +4,7 @@ import { serializePos } from 'utils/helpers'
 import { v4 } from 'uuid'
 import { nestRoom, relativePos } from './helpers'
 import { huntingGoal } from './huntingGoal'
+import { localEconGoal } from './localEconGoal'
 import { startUpGoal } from './startUpGoal'
 import { Goal, GoalNames, Nest } from './types'
 
@@ -29,7 +30,7 @@ export const createNest = (roomName: string): Nest => {
 const goals: { [nest: string]: Goal[] } = {}
 const getGoals = (nestName: string) => {
   if (!goals[nestName]) {
-    goals[nestName] = [startUpGoal, huntingGoal]
+    goals[nestName] = [startUpGoal, localEconGoal, huntingGoal]
   }
   // DONT RETURN IRRELEVANT GOALS
   return goals[nestName].filter(g => g.canCreate(nestName))
@@ -39,6 +40,8 @@ const hatchEggs = (nest: Nest) => {
   const goals = getGoals(nest.name)
   const spawns = nestRoom(nest.name).find(FIND_MY_SPAWNS)
   const spawnEnergy = nestRoom(nest.name).energyCapacityAvailable
+
+  console.log(goals.map(g => g.name).join(' - '))
 
   const eggQueue = goals
     // DONT SPAWN FOR COMPLETED GOALS
@@ -62,7 +65,7 @@ const hatchEggs = (nest: Nest) => {
             nest: nest.name,
             data: egg.data,
           },
-        }) !== OK
+        }) === OK
     )
   })
 }

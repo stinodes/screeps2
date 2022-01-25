@@ -1,6 +1,6 @@
 import { Spooders } from 'creeps'
 import { carrier, Carrier } from 'creeps/carrier'
-import { isCreepFull } from 'creeps/helpers'
+import { isCreepEmpty, isCreepFull } from 'creeps/helpers'
 import { Hunter, hunter } from 'creeps/hunter'
 import { Task, TaskNames } from 'creeps/tasks'
 import { nestFind, nestMarker, nestSpoods, oneOfStructures } from 'nest/helpers'
@@ -58,16 +58,24 @@ const createCarrierStoreTask = (
 }
 
 const createCarrierTask = (carrier: Carrier) => {
-  if (
-    [TaskNames.pickUp, TaskNames.withdraw].includes(carrier.task.name) &&
-    isCreepFull(carrier.name)
-  ) {
-    const task = createCarrierStoreTask(carrier)
-    if (task) carrier.task = task
-  } else {
-    const task = createCarrierGatherTask(carrier)
-    if (task) carrier.task = task
+  let nextTask: 'fill' | 'deposit' = 'fill'
+
+  if (isCreepFull(carrier.name)) nextTask = 'deposit'
+  else if (isCreepEmpty(carrier.name)) nextTask = 'fill'
+  else if ([TaskNames.pickUp, TaskNames.withdraw].includes(carrier.task?.name))
+    nextTask = 'fill'
+  else nextTask = 'deposit'
+
+  let task
+  switch (nextTask) {
+    case 'fill':
+      task = createCarrierGatherTask(carrier)
+      break
+    case 'deposit':
+      task = createCarrierStoreTask(carrier)
+      break
   }
+  if (task) carrier.task = task
 }
 
 export const run: Goal['run'] = nest => {

@@ -1,10 +1,12 @@
 import { Egg } from 'creeps'
 import { HuntingData } from './huntingGoal/hooks'
+import { LocalEconData } from './localEconGoal/hooks'
 import { StartUpData } from './startUpGoal/hooks'
 
 export enum GoalNames {
   startUp = 'startUp',
   hunting = 'hunting',
+  localEcon = 'localEcon',
 }
 
 export type Nest = {
@@ -16,6 +18,7 @@ export type Nest = {
 
   [GoalNames.startUp]?: StartUpData
   [GoalNames.hunting]?: HuntingData
+  [GoalNames.localEcon]?: LocalEconData
 }
 
 export type GoalState = {

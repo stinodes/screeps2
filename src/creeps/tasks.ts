@@ -106,7 +106,11 @@ export const pickUp = (
   task: Task<TaskNames.pickUp, Resource>,
 ) => {
   const resource = Game.getObjectById(task.target)
-  if (resource && resource.amount < 0 && creep.store.getFreeCapacity() > 0) {
+  if (
+    resource &&
+    resource.amount !== 0 &&
+    creep.store.getFreeCapacity() !== 0
+  ) {
     task.progress = true
     creepPickUp(creep, resource)
   } else {
