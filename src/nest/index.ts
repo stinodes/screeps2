@@ -42,7 +42,7 @@ const hatchEggs = (nest: Nest) => {
 
   const eggQueue = goals
     // DONT SPAWN FOR COMPLETED GOALS
-    .filter(g => g.isComplete(nest.name))
+    .filter(g => !g.isComplete(nest.name))
     .reduce((prev, goal) => {
       const eggs = goal.eggs(nest.name)
       return prev.concat(eggs.map(egg => ({ goal: goal.name, egg: egg })))
