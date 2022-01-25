@@ -1,5 +1,5 @@
 import { Spooders } from 'creeps'
-import { Spiderling } from 'creeps/spiderling'
+import { laySpiderlingEgg, Spiderling } from 'creeps/spiderling'
 import { nestFind, nestGoalSpoods, nestLevel } from '../helpers'
 import { GoalNames, Goal } from '../types'
 import { run } from './run'
@@ -33,12 +33,10 @@ export const startUpGoal: Goal = {
       Math.min(maxSpiderlings, requiredProgress / 1000 + 2),
     )
 
-    if (spiderlings.length < 2)
-      eggs.push({ type: Spooders.spiderling, data: {} })
-    else if (!hasUpgrader)
-      eggs.push({ type: Spooders.spiderling, data: { upgrader: true } })
+    if (spiderlings.length < 2) eggs.push(laySpiderlingEgg({}))
+    else if (!hasUpgrader) eggs.push(laySpiderlingEgg({ upgrader: true }))
     else if (spiderlings.length < requiredSpooders)
-      eggs.push({ type: Spooders.spiderling, data: {} })
+      eggs.push(laySpiderlingEgg({}))
     return eggs
   },
 

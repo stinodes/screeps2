@@ -6,6 +6,7 @@ import { Task, TaskNames } from 'creeps/tasks'
 import { nestFind, nestMarker, nestSpoods, oneOfStructures } from 'nest/helpers'
 import { Goal } from 'nest/types'
 import { deserializePos } from 'utils/helpers'
+import { hooks } from './hooks'
 
 const createCarrierGatherTask = (
   carrier: Carrier,
@@ -70,6 +71,8 @@ const createCarrierTask = (carrier: Carrier) => {
 }
 
 export const run: Goal['run'] = nest => {
+  hooks(nest)
+
   const spoods = nestSpoods(nest)
   const carriers = spoods.filter(
     spood => spood.type === Spooders.carrier,

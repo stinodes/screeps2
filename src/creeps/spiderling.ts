@@ -1,4 +1,4 @@
-import { Spooders } from 'creeps'
+import { LayEgg, Spooders } from 'creeps'
 import { creepForName } from './helpers'
 import { harvest, store, Task, TaskNames, upgrade, weave } from './tasks'
 
@@ -18,6 +18,18 @@ export type Spiderling = CreepMemory & {
     source?: Id<Source>
   }
 }
+
+export const laySpiderlingEgg: LayEgg<Spiderling['data']> = data => ({
+  type: Spooders.spiderling,
+  body: {
+    parts: {
+      [WORK]: 2,
+      [CARRY]: 1,
+      [MOVE]: 1,
+    },
+  },
+  data: data,
+})
 
 export const spiderling = ({ name, task }: Spiderling) => {
   const creep = creepForName(name)

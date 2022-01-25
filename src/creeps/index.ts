@@ -1,3 +1,5 @@
+import { Body } from './body'
+
 export enum Spooders {
   spiderling = 'spiderling',
   coreWeaver = 'core-weaver',
@@ -7,5 +9,8 @@ export enum Spooders {
 
 export type Egg = {
   type: Spooders
+  body: Body
   data: any
 }
+
+export type LayEgg<Data extends void | {}> = (data: Data) => Egg

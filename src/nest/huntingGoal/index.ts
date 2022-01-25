@@ -1,15 +1,21 @@
 import { Egg, Spooders } from 'creeps'
-import { Carrier } from 'creeps/carrier'
-import { Hunter } from 'creeps/hunter'
-import { nestGoalData, nestSpoods } from 'nest/helpers'
+import { Carrier, layCarrierEgg } from 'creeps/carrier'
+import { Hunter, layHunterEgg } from 'creeps/hunter'
+import { nestFind, nestGoalData, nestLevel, nestSpoods } from 'nest/helpers'
 import { Goal, GoalNames } from 'nest/types'
 import { HuntingData } from './hooks'
 import { run } from './run'
 
 export const huntingGoal: Goal = {
   name: GoalNames.hunting,
-  canCreate: (nest: string) => false,
-  isComplete: () => false,
+  canCreate: (nest: string) => {
+    const level = nestLevel(nest)
+    const exts = nestFind(nest, FIND_STRUCTURES, {
+      filter: { structureType: STRUCTURE_EXTENSION },
+    })
+    return level > 2 && exts.length > 5
+  },
+  isComplete: (nest: string) => false,
 
   eggs: (nest: string) => {
     const eggs: Egg[] = []
@@ -28,13 +34,13 @@ export const huntingGoal: Goal = {
     if (hunters.length !== huntingGrounds.length)
       huntingGrounds.forEach(pos => {
         if (!hunters.some(h => h.data?.huntingGround === pos))
-          eggs.push({ type: Spooders.hunter, data: { huntingGround: pos } })
+          eggs.push(layHunterEgg({ huntingGround: pos }))
       })
 
     if (carriers.length !== huntingGrounds.length)
       huntingGrounds.forEach(pos => {
         if (!carriers.some(h => h.data?.huntingGround === pos))
-          eggs.push({ type: Spooders.carrier, data: { huntingGround: pos } })
+          eggs.push(layCarrierEgg({ huntingGround: pos }))
       })
 
     return eggs

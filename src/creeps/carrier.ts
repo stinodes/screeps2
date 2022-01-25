@@ -1,4 +1,4 @@
-import { Spooders } from 'creeps'
+import { LayEgg, Spooders } from 'creeps'
 import { SerializedPosition } from 'utils/helpers'
 import { creepForName } from './helpers'
 import { pickUp, store, Task, TaskNames, withdraw } from './tasks'
@@ -16,6 +16,18 @@ export type Carrier = CreepMemory & {
     huntingGround: SerializedPosition
   }
 }
+
+export const layCarrierEgg: LayEgg<Carrier['data']> = data => ({
+  type: Spooders.carrier,
+  body: {
+    parts: {
+      [CARRY]: 5,
+      [MOVE]: 6,
+    },
+    grow: true,
+  },
+  data: data,
+})
 
 export const carrier = ({ task, name }: Carrier) => {
   const creep = creepForName(name)

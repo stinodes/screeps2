@@ -1,7 +1,9 @@
 import { Egg } from 'creeps'
+import { createBody } from 'creeps/body'
 import { serializePos } from 'utils/helpers'
 import { v4 } from 'uuid'
 import { nestRoom, relativePos } from './helpers'
+import { huntingGoal } from './huntingGoal'
 import { startUpGoal } from './startUpGoal'
 import { Goal, GoalNames, Nest } from './types'
 
@@ -27,19 +29,24 @@ export const createNest = (roomName: string): Nest => {
 const goals: { [nest: string]: Goal[] } = {}
 const getGoals = (nestName: string) => {
   if (!goals[nestName]) {
-    goals[nestName] = [startUpGoal]
+    goals[nestName] = [startUpGoal, huntingGoal]
   }
-  return goals[nestName]
+  // DONT RETURN IRRELEVANT GOALS
+  return goals[nestName].filter(g => g.canCreate(nestName))
 }
 
 const hatchEggs = (nest: Nest) => {
   const goals = getGoals(nest.name)
   const spawns = nestRoom(nest.name).find(FIND_MY_SPAWNS)
+  const spawnEnergy = nestRoom(nest.name).energyCapacityAvailable
 
-  const eggQueue = goals.reduce((prev, goal) => {
-    const eggs = goal.eggs(nest.name)
-    return prev.concat(eggs.map(egg => ({ goal: goal.name, egg: egg })))
-  }, [] as { goal: GoalNames; egg: Egg }[])
+  const eggQueue = goals
+    // DONT SPAWN FOR COMPLETED GOALS
+    .filter(g => g.isComplete(nest.name))
+    .reduce((prev, goal) => {
+      const eggs = goal.eggs(nest.name)
+      return prev.concat(eggs.map(egg => ({ goal: goal.name, egg: egg })))
+    }, [] as { goal: GoalNames; egg: Egg }[])
 
   eggQueue.some(({ egg, goal }) => {
     const name = `${egg.type}-${v4()}`
@@ -47,7 +54,7 @@ const hatchEggs = (nest: Nest) => {
     return (
       spawns
         .find(spawn => !spawn.spawning)
-        ?.spawnCreep([WORK, WORK, CARRY, MOVE], name, {
+        ?.spawnCreep(createBody(egg.body, spawnEnergy), name, {
           memory: {
             name,
             goal,
