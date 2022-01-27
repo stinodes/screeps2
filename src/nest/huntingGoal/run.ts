@@ -3,62 +3,18 @@ import { carrier, Carrier } from 'creeps/carrier'
 import { isCreepEmpty, isCreepFull } from 'creeps/helpers'
 import { Hunter, hunter } from 'creeps/hunter'
 import { Task, TaskNames } from 'creeps/tasks'
+import { taskForPriority } from 'creeps/tasks/taskPriority'
 import { nestFind, nestMarker, nestSpoods, oneOfStructures } from 'nest/helpers'
 import { Goal } from 'nest/types'
 import { deserializePos } from 'utils/helpers'
 import { hooks } from './hooks'
 
-const createCarrierGatherTask = (
-  carrier: Carrier,
-):
-  | null
-  | Task<TaskNames.pickUp, Resource>
-  | Task<TaskNames.withdraw, AnyStoreStructure> => {
-  if (!carrier.data) return null
-
-  const pos = deserializePos(carrier.data?.huntingGround)
-  const resource = pos
-    .lookFor(LOOK_RESOURCES)
-    .sort((a, b) => a.amount - b.amount)[0]
-  const container = pos
-    .lookFor(LOOK_STRUCTURES)
-    .filter(
-      structure => structure.structureType === STRUCTURE_CONTAINER,
-    )[0] as AnyStoreStructure
-
-  if (resource) return { name: TaskNames.pickUp, target: resource.id }
-  else if (container) return { name: TaskNames.withdraw, target: container.id }
-
-  return null
-}
-
-const createCarrierStoreTask = (
-  carrier: Carrier,
-):
-  | null
-  | Task<TaskNames.store, AnyStoreStructure>
-  | Task<TaskNames.drop, null, string> => {
-  const sourcesAndExtensions = nestFind(carrier.nest, FIND_STRUCTURES, {
-    filter: structure =>
-      oneOfStructures(structure, [STRUCTURE_SPAWN, STRUCTURE_EXTENSION]) &&
-      (structure as AnyStoreStructure).store.getFreeCapacity(RESOURCE_ENERGY) >
-        0,
-  }) as (StructureSpawn | StructureExtension)[]
-  const storage = nestFind(carrier.nest, FIND_STRUCTURES, {
-    filter: { structureType: STRUCTURE_STORAGE },
-  })[0] as StructureStorage | void
-
-  if (sourcesAndExtensions.length)
-    return { name: TaskNames.store, target: sourcesAndExtensions[0].id }
-
-  if (storage) return { name: TaskNames.store, target: storage.id }
-
-  const storagePos = nestMarker(carrier.nest, 'storage')
-  return { name: TaskNames.drop, target: storagePos }
-}
-
 const createCarrierTask = (carrier: Carrier) => {
   let nextTask: 'fill' | 'deposit' = 'fill'
+
+  if (!carrier.data?.huntingGround) return
+
+  const huntingGround = deserializePos(carrier.data?.huntingGround)
 
   if (isCreepFull(carrier.name)) nextTask = 'deposit'
   else if (isCreepEmpty(carrier.name)) nextTask = 'fill'
@@ -69,10 +25,53 @@ const createCarrierTask = (carrier: Carrier) => {
   let task
   switch (nextTask) {
     case 'fill':
-      task = createCarrierGatherTask(carrier)
+      task = taskForPriority([
+        {
+          name: TaskNames.pickUp,
+          getTarget: () =>
+            huntingGround
+              .lookFor(LOOK_RESOURCES)
+              .sort((a, b) => a.amount - b.amount)[0],
+        },
+        {
+          name: TaskNames.withdraw,
+          getTarget: () =>
+            huntingGround
+              .lookFor(LOOK_STRUCTURES)
+              .filter(
+                structure => structure.structureType === STRUCTURE_CONTAINER,
+              )[0] as AnyStoreStructure,
+        },
+      ])
       break
     case 'deposit':
-      task = createCarrierStoreTask(carrier)
+      task = taskForPriority([
+        {
+          name: TaskNames.store,
+          getTarget: () =>
+            nestFind(carrier.nest, FIND_STRUCTURES, {
+              filter: structure =>
+                oneOfStructures(structure, [
+                  STRUCTURE_SPAWN,
+                  STRUCTURE_EXTENSION,
+                ]) &&
+                (structure as AnyStoreStructure).store.getFreeCapacity(
+                  RESOURCE_ENERGY,
+                ) > 0,
+            }),
+        },
+        {
+          name: TaskNames.store,
+          getTarget: () =>
+            nestFind(carrier.nest, FIND_STRUCTURES, {
+              filter: { structureType: STRUCTURE_STORAGE },
+            })[0],
+        },
+        {
+          name: TaskNames.drop,
+          getTarget: () => nestMarker(carrier.nest, 'storage'),
+        },
+      ])
       break
   }
   if (task) carrier.task = task

@@ -1,6 +1,6 @@
-import {LayEgg, Spooders} from 'creeps'
-import {deserializePos, SerializedPosition} from 'utils/helpers'
-import {creepForName} from './helpers'
+import { LayEgg, Spooders } from 'creeps'
+import { deserializePos, SerializedPosition } from 'utils/helpers'
+import { creepForName } from './helpers'
 
 export type Hunter = CreepMemory & {
   type: Spooders.hunter
@@ -11,7 +11,11 @@ export type Hunter = CreepMemory & {
   }
 }
 
-export const layHunterEgg: LayEgg<Hunter['data']> = data => ({
+export const layHunterEgg: LayEgg<Hunter['data']> = (
+  goal,
+  data,
+  priority = 1,
+) => ({
   type: Spooders.hunter,
   body: {
     parts: {
@@ -20,7 +24,9 @@ export const layHunterEgg: LayEgg<Hunter['data']> = data => ({
     },
     grow: false,
   },
+  goal,
   data: data,
+  priority,
 })
 
 export const hunter = (hunter: Hunter) => {

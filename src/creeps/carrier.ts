@@ -17,7 +17,11 @@ export type Carrier = CreepMemory & {
   }
 }
 
-export const layCarrierEgg: LayEgg<Carrier['data']> = data => ({
+export const layCarrierEgg: LayEgg<Carrier['data']> = (
+  goal,
+  data,
+  priority = 1,
+) => ({
   type: Spooders.carrier,
   body: {
     parts: {
@@ -26,7 +30,10 @@ export const layCarrierEgg: LayEgg<Carrier['data']> = data => ({
     },
     grow: true,
   },
+  goal,
   data: data,
+
+  priority,
 })
 
 export const carrier = ({ task, name }: Carrier) => {

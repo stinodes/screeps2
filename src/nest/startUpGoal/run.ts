@@ -2,6 +2,7 @@ import { Spooders } from 'creeps'
 import { creepForName, isCreepEmpty, isCreepFull } from 'creeps/helpers'
 import { spiderling, Spiderling, SpiderlingTask } from 'creeps/spiderling'
 import { Task, TaskNames } from 'creeps/tasks'
+import { taskForPriority } from 'creeps/tasks/taskPriority'
 import {
   getFreeSources,
   nestFind,
@@ -15,20 +16,6 @@ import { hooks } from './hooks'
 export const getFreeSource = (nest: string, s: Spiderling) => {
   const sources = getFreeSources(nest)
   return sortByRange(sources, creepForName(s.name).pos)[0]
-}
-
-type TaskPriority<T extends Task<any, any, any>> = {
-  name: T['name']
-  getTarget?: () => undefined | null | T['target']
-}
-const taskForPriority = <T extends Task<any, any, any>>(
-  prios: TaskPriority<T>[],
-): T | null => {
-  const prio = prios.find(prio => {
-    return !prio.getTarget || prio.getTarget()
-  })
-  if (!prio) return null
-  return { name: prio.name, target: prio.getTarget && prio.getTarget() } as T
 }
 
 const createSpiderlingTask = (

@@ -33,10 +33,12 @@ export const startUpGoal: Goal = {
       Math.min(maxSpiderlings, requiredProgress / 1000 + 2),
     )
 
-    if (spiderlings.length < 2) eggs.push(laySpiderlingEgg({}))
-    else if (!hasUpgrader) eggs.push(laySpiderlingEgg({ upgrader: true }))
+    if (spiderlings.length < 2)
+      eggs.push(laySpiderlingEgg(GoalNames.startUp, {}))
+    else if (!hasUpgrader)
+      eggs.push(laySpiderlingEgg(GoalNames.startUp, { upgrader: true }))
     else if (spiderlings.length < requiredSpooders)
-      eggs.push(laySpiderlingEgg({}))
+      eggs.push(laySpiderlingEgg(GoalNames.startUp, {}))
     return eggs
   },
 

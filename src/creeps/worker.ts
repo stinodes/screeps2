@@ -28,7 +28,11 @@ export type Worker = CreepMemory & {
   }
 }
 
-export const layWorkerEgg: LayEgg<Worker['data']> = data => ({
+export const layWorkerEgg: LayEgg<Worker['data']> = (
+  goal,
+  data,
+  priority = 2,
+) => ({
   type: Spooders.worker,
   body: {
     parts: {
@@ -37,7 +41,10 @@ export const layWorkerEgg: LayEgg<Worker['data']> = data => ({
       [MOVE]: 1,
     },
   },
+  goal,
   data: data,
+
+  priority,
 })
 
 export const worker = ({ name, task }: Worker) => {

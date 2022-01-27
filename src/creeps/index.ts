@@ -1,3 +1,4 @@
+import { GoalNames } from 'nest/types'
 import { Body } from './body'
 
 export enum Spooders {
@@ -12,6 +13,14 @@ export type Egg = {
   type: Spooders
   body: Body
   data: any
+  goal: GoalNames
+
+  index?: number
+  priority: number
 }
 
-export type LayEgg<Data extends void | {}> = (data: Data) => Egg
+export type LayEgg<Data extends void | {}> = (
+  goal: GoalNames,
+  data: Data,
+  priority?: number,
+) => Egg

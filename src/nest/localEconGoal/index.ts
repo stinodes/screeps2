@@ -17,7 +17,8 @@ export const localEconGoal: Goal = {
     const data = nestGoalData(nest, GoalNames.localEcon) as LocalEconData
     const eggs = []
 
-    if (data.status === 'unhealthy') eggs.push(layWorkerEgg({}))
+    if (data.status === 'unhealthy')
+      eggs.push(layWorkerEgg(GoalNames.localEcon, {}, 0))
 
     return eggs
   },

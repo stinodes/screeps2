@@ -33,10 +33,10 @@ export const huntingGoal: Goal = {
 
     huntingGrounds.forEach(hg => {
       if (!hunters.some(h => h.data.huntingGround === hg))
-        eggs.push(layHunterEgg({ huntingGround: hg }))
+        eggs.push(layHunterEgg(GoalNames.hunting, { huntingGround: hg }))
 
       if (!carriers.some(c => c.data?.huntingGround === hg))
-        eggs.push(layCarrierEgg({ huntingGround: hg }))
+        eggs.push(layCarrierEgg(GoalNames.hunting, { huntingGround: hg }))
     })
 
     return eggs

@@ -28,7 +28,11 @@ export type Spiderling = CreepMemory & {
   }
 }
 
-export const laySpiderlingEgg: LayEgg<Spiderling['data']> = data => ({
+export const laySpiderlingEgg: LayEgg<Spiderling['data']> = (
+  goal,
+  data,
+  priority = 2,
+) => ({
   type: Spooders.spiderling,
   body: {
     parts: {
@@ -37,7 +41,10 @@ export const laySpiderlingEgg: LayEgg<Spiderling['data']> = data => ({
       [MOVE]: 1,
     },
   },
+  goal,
   data: data,
+
+  priority,
 })
 
 export const spiderling = ({ name, task }: Spiderling) => {
