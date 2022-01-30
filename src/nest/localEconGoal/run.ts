@@ -34,7 +34,7 @@ const createNewWorkerTask = (
     }
   }
 
-  return { name: TaskNames.upgrade, target: '' as Id<null> }
+  return { name: TaskNames.upgrade, target: null }
 }
 
 const getFreeSource = (nest: string, s: Worker) => {
@@ -67,8 +67,7 @@ export const run: Goal['run'] = (nest: string) => {
 
   workersWithCompleteTask.forEach(s => {
     if (s.task && [TaskNames.harvest, TaskNames.pickUp].includes(s.task.name)) {
-      if (s.data?.upgrader)
-        s.task = { name: TaskNames.upgrade, target: '' as Id<null> }
+      if (s.data?.upgrader) s.task = { name: TaskNames.upgrade, target: null }
       else
         s.task = createNewWorkerTask(
           { stores: unfilledStores, sites: constructionSites },

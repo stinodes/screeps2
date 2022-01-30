@@ -68,7 +68,8 @@
   },
   "dependencies": {
     "@types/uuid": "^8.3.4",
+    "@types/uuid-js": "^0.7.3",
     "source-map": "~0.6.1",
-    "uuid": "^8.3.2"
+    "uuid-js": "^0.7.5"
   }
 }

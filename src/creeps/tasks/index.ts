@@ -7,7 +7,7 @@ import {
   creepTransfer,
   creepUpgrade,
   creepWithdraw,
-} from './helpers'
+} from '../helpers'
 
 export enum TaskNames {
   harvest = 'harvest',
@@ -72,8 +72,10 @@ export const drop = (
   return task
 }
 
-export const upgrade = (creep: Creep, task: Task<TaskNames.upgrade, any>) => {
-  const target = Game.getObjectById(task.target)
+export const upgrade = (
+  creep: Creep,
+  task: Task<TaskNames.upgrade, null, null>,
+) => {
   if (creep.store.getUsedCapacity(RESOURCE_ENERGY)) {
     task.progress = true
     creepUpgrade(creep)

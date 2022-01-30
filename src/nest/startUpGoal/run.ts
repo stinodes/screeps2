@@ -25,13 +25,29 @@ const createSpiderlingTask = (
   let nextTask
   if (isCreepEmpty(s.name)) nextTask = 'gather'
   else if (isCreepFull(s.name)) nextTask = 'use'
-  if ([TaskNames.pickUp, TaskNames.harvest].includes(s.task?.name))
+  else if ([TaskNames.pickUp, TaskNames.harvest].includes(s.task?.name))
     nextTask = 'gather'
   else nextTask = 'use'
 
   let task: null | SpiderlingTask = null
   switch (nextTask) {
+    case 'use':
+      if (s.data?.upgrader) task = { name: TaskNames.upgrade, target: null }
+      else
+        task = taskForPriority([
+          {
+            name: TaskNames.store,
+            getTarget: () => stores[0]?.id,
+          },
+          {
+            name: TaskNames.weave,
+            getTarget: () => sites[0]?.id,
+          },
+          { name: TaskNames.upgrade },
+        ])
+      break
     case 'gather':
+    default:
       task = taskForPriority([
         {
           name: TaskNames.pickUp,
@@ -45,20 +61,9 @@ const createSpiderlingTask = (
         },
       ])
       break
-    case 'use':
-      task = taskForPriority([
-        {
-          name: TaskNames.store,
-          getTarget: () => stores[0]?.id,
-        },
-        {
-          name: TaskNames.weave,
-          getTarget: () => sites[0]?.id,
-        },
-        { name: TaskNames.upgrade },
-      ])
-      break
   }
+
+  console.log(JSON.stringify(task))
 
   if (task) s.task = task
 }

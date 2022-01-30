@@ -1,7 +1,7 @@
 import { Egg } from 'creeps'
+import uuid from 'uuid-js'
 import { createBody } from 'creeps/body'
 import { serializePos } from 'utils/helpers'
-import { v4 } from 'uuid'
 import { nestRoom, relativePos } from './helpers'
 import { huntingGoal } from './huntingGoal'
 import { localEconGoal } from './localEconGoal'
@@ -48,11 +48,27 @@ const hatchEggs = (nest: Nest) => {
     .filter(g => !g.isComplete(nest.name))
     .reduce((prev, goal) => {
       const eggs = goal.eggs(nest.name)
-      return prev.concat(eggs.map(egg => ({ goal: goal.name, egg: egg })))
-    }, [] as { goal: GoalNames; egg: Egg }[])
+      return prev.concat(eggs)
+    }, [] as Egg[])
+    .map((egg, index) => {
+      egg.index = index
+      return egg
+    })
+    .sort((a, b) => {
+      const comp = a.priority - b.priority
+      if (
+        comp === 0 &&
+        typeof a.index === 'number' &&
+        typeof b.index === 'number'
+      )
+        return a.index - b.index
+      return comp
+    })
 
-  eggQueue.some(({ egg, goal }) => {
-    const name = `${egg.type}-${v4()}`
+  console.log('eggs: ', eggQueue.map(egg => egg.type).join(' - '))
+
+  eggQueue.some(egg => {
+    const name = `${egg.type}-${uuid.create().toString()}`
 
     return (
       spawns
@@ -60,7 +76,7 @@ const hatchEggs = (nest: Nest) => {
         ?.spawnCreep(createBody(egg.body, spawnEnergy), name, {
           memory: {
             name,
-            goal,
+            goal: egg.goal,
             type: egg.type,
             nest: nest.name,
             data: egg.data,
