@@ -84,7 +84,7 @@ const createCarrierTask = (carrier: Carrier) => {
               .lookFor(LOOK_STRUCTURES)
               .filter(
                 structure => structure.structureType === STRUCTURE_CONTAINER,
-              )[0] as AnyStoreStructure,
+              )[0]?.id as Id<AnyStoreStructure>,
         },
       ])
       break

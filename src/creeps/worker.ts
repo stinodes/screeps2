@@ -9,6 +9,7 @@ import {
   TaskNames,
   upgrade,
   weave,
+  withdraw,
 } from './tasks'
 
 export type WorkerTask =
@@ -60,6 +61,8 @@ export const worker = ({ name, task }: Worker) => {
       return harvest(creep, task)
     case TaskNames.pickUp:
       return pickUp(creep, task)
+    case TaskNames.withdraw:
+      return withdraw(creep, task)
     case TaskNames.store:
       return store(creep, task)
     case TaskNames.weave:

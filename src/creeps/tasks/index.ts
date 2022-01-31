@@ -133,7 +133,7 @@ export const pickUp = (
   if (
     resource &&
     resource.amount !== 0 &&
-    creep.store.getFreeCapacity() !== 0
+    creep.store.getFreeCapacity(RESOURCE_ENERGY) !== 0
   ) {
     task.progress = true
     creepPickUp(creep, resource)
@@ -150,8 +150,8 @@ export const withdraw = (
   const store = Game.getObjectById(task.target)
   if (
     store &&
-    store.store.getUsedCapacity(RESOURCE_ENERGY) > 0 &&
-    creep.store.getFreeCapacity() > 0
+    store.store.getUsedCapacity(RESOURCE_ENERGY) !== 0 &&
+    creep.store.getFreeCapacity(RESOURCE_ENERGY) !== 0
   ) {
     task.progress = true
     creepWithdraw(creep, store)

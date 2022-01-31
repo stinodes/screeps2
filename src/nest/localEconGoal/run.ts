@@ -1,9 +1,9 @@
-import { config } from 'config'
-import { Spooders } from 'creeps'
-import { creepForName, isCreepEmpty, isCreepFull } from 'creeps/helpers'
-import { TaskNames } from 'creeps/tasks'
-import { creepPhase, taskForPriority } from 'creeps/tasks/taskPriority'
-import { Worker, worker, WorkerTask } from 'creeps/worker'
+import {config} from 'config'
+import {Spooders} from 'creeps'
+import {creepForName, isCreepEmpty, isCreepFull} from 'creeps/helpers'
+import {TaskNames} from 'creeps/tasks'
+import {creepPhase, taskForPriority} from 'creeps/tasks/taskPriority'
+import {Worker, worker, WorkerTask} from 'creeps/worker'
 import {
   getEmptyAdjecentSquares,
   nestFind,
@@ -16,12 +16,13 @@ import {
   sortByRange,
   structureNeedsRepair,
 } from 'nest/helpers'
-import { Goal, GoalNames } from 'nest/types'
-import { deserializePos } from 'utils/helpers'
-import { hooks, LocalEconData } from './hooks'
+import {HuntingData} from '../huntingGoal/hooks'
+import {Goal, GoalNames} from 'nest/types'
+import {deserializePos} from 'utils/helpers'
+import {hooks, LocalEconData} from './hooks'
 
 const createWorkerEmergencyTask = (
-  { stores }: { stores: AnyStoreStructure[] },
+  {stores}: {stores: AnyStoreStructure[]},
   worker: Worker,
 ) => {
   const phase = creepPhase(worker, [
@@ -45,7 +46,7 @@ const createWorkerEmergencyTask = (
           name: TaskNames.store,
           getTarget: () => stores[0]?.id,
         },
-        { name: TaskNames.upgrade },
+        {name: TaskNames.upgrade},
       ])
       break
     case 'gather':
@@ -70,9 +71,10 @@ const createWorkerEmergencyTask = (
 }
 
 const createWorkerTask = (
-  { sites }: { stores: AnyStoreStructure[]; sites: ConstructionSite[] },
+  {sites}: {stores: AnyStoreStructure[]; sites: ConstructionSite[]},
   worker: Worker,
 ) => {
+  const huntingGrounds = (nestGoalData(worker.nest, GoalNames.hunting) as HuntingData).huntingGrounds
   const storagePos = deserializePos(nestMarker(worker.nest, 'storage'))
   const structures = nestFind(worker.nest, FIND_STRUCTURES)
 
@@ -82,7 +84,7 @@ const createWorkerTask = (
   const toFill = structures.filter(
     struct =>
       (struct as AnyStoreStructure).store?.getFreeCapacity(RESOURCE_ENERGY) >
-        0 &&
+      0 &&
       oneOfStructures(struct, [
         STRUCTURE_TOWER,
         STRUCTURE_EXTENSION,
@@ -108,7 +110,7 @@ const createWorkerTask = (
   switch (phase) {
     case 'use':
       if (worker.data?.upgrader)
-        task = { name: TaskNames.upgrade, target: null }
+        task = {name: TaskNames.upgrade, target: null}
       else
         task = taskForPriority([
           {
@@ -127,12 +129,16 @@ const createWorkerTask = (
             name: TaskNames.weave,
             getTarget: () => sites[0]?.id,
           },
-          { name: TaskNames.upgrade },
+          {name: TaskNames.upgrade},
         ])
       break
     case 'gather':
     default:
       task = taskForPriority([
+        {
+          name: TaskNames.pickUp,
+          getTarget: () => storagePos.lookFor(LOOK_RESOURCES)[0]?.id,
+        },
         {
           name: TaskNames.pickUp,
           getTarget: () => storagePos.lookFor(LOOK_RESOURCES)[0]?.id,
@@ -147,8 +153,22 @@ const createWorkerTask = (
               )[0]?.id as Id<AnyStoreStructure>,
         },
         {
-          name: TaskNames.pickUp,
-          getTarget: () => storagePos.lookFor(LOOK_RESOURCES)[0]?.id,
+          name: TaskNames.withdraw,
+          getTarget: () =>
+            huntingGrounds ?
+              sortByRange(
+                huntingGrounds
+                  .map(
+                    pos =>
+                      deserializePos(pos)
+                        .lookFor(LOOK_STRUCTURES)
+                        .filter(struct =>
+                          oneOfStructures(struct as any, [STRUCTURE_CONTAINER]) && (struct as AnyStoreStructure).store.getUsedCapacity(RESOURCE_ENERGY) > 0,
+                        )[0] as AnyStoreStructure
+                  )
+                  .filter(Boolean),
+                creepForName(worker.name).pos
+              )[0]?.id : null,
         },
         {
           name: TaskNames.harvest,
@@ -193,9 +213,9 @@ export const run: Goal['run'] = (nest: string) => {
 
   workersWithCompleteTask.forEach(s => {
     if (data.status === 'unhealthy')
-      createWorkerEmergencyTask({ stores: unfilledStores }, s)
+      createWorkerEmergencyTask({stores: unfilledStores}, s)
     else
-      createWorkerTask({ stores: unfilledStores, sites: constructionSites }, s)
+      createWorkerTask({stores: unfilledStores, sites: constructionSites}, s)
   })
 
   spoods.forEach(spood => {

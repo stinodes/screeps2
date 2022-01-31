@@ -2,6 +2,8 @@ import {
   getEmptyAdjecentSquares,
   nestFind,
   nestGoalData,
+  nestLevel,
+  nestMarker,
   nestRoom,
   sortByRange,
 } from 'nest/helpers'
@@ -11,11 +13,13 @@ import { deserializePos, SerializedPosition, serializePos } from 'utils/helpers'
 export type HuntingData = {
   huntingGrounds?: SerializedPosition[]
   initContainers?: boolean
+  initStorage?: boolean
 }
 
 export const hooks = (nest: string) => {
   createHuntingGrounds(nest)
   createContainerSites(nest)
+  createStorage(nest)
 }
 
 const createHuntingGrounds = (nest: string) => {
@@ -51,4 +55,15 @@ const createContainerSites = (nest: string) => {
       pos.createConstructionSite(STRUCTURE_CONTAINER),
     )
   }
+}
+
+const createStorage = (nest: string) => {
+  const huntingData = nestGoalData(nest, GoalNames.hunting) as HuntingData
+
+  if (huntingData.initStorage || nestLevel(nest) > 4) return
+
+  const storagePos = deserializePos(nestMarker(nest, 'storage'))
+  storagePos.createConstructionSite(STRUCTURE_STORAGE)
+
+  huntingData.initStorage = true
 }
