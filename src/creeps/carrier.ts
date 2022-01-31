@@ -1,7 +1,7 @@
-import { LayEgg, Spooders } from 'creeps'
-import { SerializedPosition } from 'utils/helpers'
-import { creepForName } from './helpers'
-import { pickUp, store, Task, TaskNames, withdraw } from './tasks'
+import {LayEgg, Spooders} from 'creeps'
+import {SerializedPosition} from 'utils/helpers'
+import {creepForName} from './helpers'
+import {drop, pickUp, store, Task, TaskNames, withdraw} from './tasks'
 
 export type CarrierTask =
   | Task<TaskNames.store, AnyStoreStructure>
@@ -14,6 +14,7 @@ export type Carrier = CreepMemory & {
   task: CarrierTask
   data?: {
     huntingGround: SerializedPosition
+    phase?: 'fill' | 'deposit'
   }
 }
 
@@ -36,7 +37,7 @@ export const layCarrierEgg: LayEgg<Carrier['data']> = (
   priority,
 })
 
-export const carrier = ({ task, name }: Carrier) => {
+export const carrier = ({task, name}: Carrier) => {
   const creep = creepForName(name)
   switch (task?.name) {
     case TaskNames.pickUp:
@@ -47,6 +48,9 @@ export const carrier = ({ task, name }: Carrier) => {
       break
     case TaskNames.store:
       store(creep, task)
+      break
+    case TaskNames.drop:
+      drop(creep, task)
       break
   }
 }

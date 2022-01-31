@@ -63,8 +63,6 @@ const createSpiderlingTask = (
       break
   }
 
-  console.log(JSON.stringify(task))
-
   if (task) s.task = task
 }
 

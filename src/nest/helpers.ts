@@ -1,3 +1,4 @@
+import { config } from 'config'
 import { Task } from 'creeps/tasks'
 import { GoalNames } from './types'
 
@@ -99,3 +100,10 @@ export const isObjectEmpty = (obj: Resource | AnyStoreStructure | null) => {
   }
   return true
 }
+
+export const structureNeedsRepair = (
+  structure: AnyStructure,
+  minFactor: number = 1,
+) =>
+  Math.min(config.maxHits, structure.hits) < structure.hitsMax / minFactor &&
+  Math.min(structure.hits, config.maxHits) < config.maxHits / minFactor

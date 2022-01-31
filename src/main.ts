@@ -1,5 +1,4 @@
 import { Spooders } from 'creeps'
-import { Task } from 'creeps/tasks'
 import { createNest, nest } from 'nest'
 import { Nest } from 'nest/types'
 import { ErrorMapper } from 'utils/ErrorMapper'
@@ -27,7 +26,9 @@ declare global {
     type: Spooders
     nest: string
     goal: string
-    data?: {}
+    data?: {
+      phase?: any
+    }
   }
 
   // Syntax for adding proprties to `global` (ex "global.log")

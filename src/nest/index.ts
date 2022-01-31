@@ -2,7 +2,13 @@ import { Egg } from 'creeps'
 import uuid from 'uuid-js'
 import { createBody } from 'creeps/body'
 import { serializePos } from 'utils/helpers'
-import { nestRoom, relativePos } from './helpers'
+import {
+  nestFind,
+  nestGoalSpoods,
+  nestRoom,
+  relativePos,
+  structureNeedsRepair,
+} from './helpers'
 import { huntingGoal } from './huntingGoal'
 import { localEconGoal } from './localEconGoal'
 import { startUpGoal } from './startUpGoal'
@@ -16,7 +22,7 @@ export const createNest = (roomName: string): Nest => {
   const markers: Nest['markers'] = {}
 
   if (spawn) markers.hatchery = serializePos(spawn.pos)
-  if (spawn) markers.storage = serializePos(relativePos(spawn.pos, 0, -2))
+  if (spawn) markers.storage = serializePos(relativePos(spawn.pos, 0, 2))
 
   return {
     name: roomName,
@@ -33,13 +39,39 @@ const getGoals = (nestName: string) => {
     goals[nestName] = [startUpGoal, localEconGoal, huntingGoal]
   }
   // DONT RETURN IRRELEVANT GOALS
-  return goals[nestName].filter(g => g.canCreate(nestName))
+  return goals[nestName].filter(
+    g => g.canCreate(nestName) || nestGoalSpoods(nestName, g.name).length,
+  )
+}
+
+const attemptHatch = (spawns: StructureSpawn[], egg?: Egg): boolean => {
+  if (!egg) return false
+
+  const name = `${egg.type}-${uuid.create().toString()}`
+  const room = spawns[0].room
+  const spawnEnergy = room.energyCapacityAvailable
+
+  return (
+    spawns
+      .find(spawn => !spawn.spawning)
+      ?.spawnCreep(createBody(egg.body, spawnEnergy), name, {
+        memory: {
+          name,
+          goal: egg.goal,
+          type: egg.type,
+          nest: room.name,
+          data: egg.data,
+        },
+      }) === OK
+  )
 }
 
 const hatchEggs = (nest: Nest) => {
   const goals = getGoals(nest.name)
   const spawns = nestRoom(nest.name).find(FIND_MY_SPAWNS)
-  const spawnEnergy = nestRoom(nest.name).energyCapacityAvailable
+  const towers = nestFind(nest.name, FIND_MY_STRUCTURES, {
+    filter: { structureType: STRUCTURE_TOWER },
+  }) as StructureTower[]
 
   console.log(goals.map(g => g.name).join(' - '))
 
@@ -67,23 +99,18 @@ const hatchEggs = (nest: Nest) => {
 
   console.log('eggs: ', eggQueue.map(egg => egg.type).join(' - '))
 
-  eggQueue.some(egg => {
-    const name = `${egg.type}-${uuid.create().toString()}`
-
-    return (
-      spawns
-        .find(spawn => !spawn.spawning)
-        ?.spawnCreep(createBody(egg.body, spawnEnergy), name, {
-          memory: {
-            name,
-            goal: egg.goal,
-            type: egg.type,
-            nest: nest.name,
-            data: egg.data,
-          },
-        }) === OK
+  if (towers.length) {
+    const toAttack = nestFind(nest.name, FIND_HOSTILE_CREEPS)
+    const toRepair = nestFind(nest.name, FIND_MY_STRUCTURES).filter(
+      structureNeedsRepair,
     )
-  })
+    towers.forEach(t => {
+      if (toAttack.length) t.attack(toAttack[0])
+      else if (toRepair.length) t.repair(toRepair[0])
+    })
+  }
+
+  attemptHatch(spawns, eggQueue[0])
 }
 
 export const nest = (nest: Nest) => {

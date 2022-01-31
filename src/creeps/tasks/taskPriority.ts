@@ -13,3 +13,24 @@ export const taskForPriority = <T extends Task<any, any, any>>(
   if (!prio) return null
   return { name: prio.name, target: prio.getTarget && prio.getTarget() } as T
 }
+
+export type TaskPhase<S extends CreepMemory, P extends string> = {
+  name: P
+  when: (s: S) => boolean
+}
+
+export const creepPhase = <P extends string, S extends CreepMemory>(
+  spider: S,
+  phases: TaskPhase<S, P>[],
+): P | null => {
+  if (!spider.data) spider.data = {}
+
+  const newPhaseName = phases.reduce((prev, phase) => {
+    if (phase.when(spider)) return phase.name
+    return prev
+  }, spider.data?.phase)
+
+  spider.data.phase = newPhaseName || phases[0].name
+
+  return spider.data.phase
+}

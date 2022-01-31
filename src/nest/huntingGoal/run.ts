@@ -1,55 +1,45 @@
 import { Spooders } from 'creeps'
 import { carrier, Carrier } from 'creeps/carrier'
-import { isCreepEmpty, isCreepFull } from 'creeps/helpers'
+import { creepForName, isCreepEmpty, isCreepFull } from 'creeps/helpers'
 import { Hunter, hunter } from 'creeps/hunter'
-import { Task, TaskNames } from 'creeps/tasks'
-import { taskForPriority } from 'creeps/tasks/taskPriority'
-import { nestFind, nestMarker, nestSpoods, oneOfStructures } from 'nest/helpers'
-import { Goal } from 'nest/types'
+import { TaskNames } from 'creeps/tasks'
+import { creepPhase, taskForPriority } from 'creeps/tasks/taskPriority'
+import {
+  nestFind,
+  nestGoalSpoods,
+  nestMarker,
+  oneOfStructures,
+  sortByRange,
+} from 'nest/helpers'
+import { Goal, GoalNames } from 'nest/types'
 import { deserializePos } from 'utils/helpers'
 import { hooks } from './hooks'
 
 const createCarrierTask = (carrier: Carrier) => {
-  let nextTask: 'fill' | 'deposit' = 'fill'
+  const phase = creepPhase(carrier, [
+    {
+      name: 'fill',
+      when: s => isCreepEmpty(s.name),
+    },
+
+    {
+      name: 'deposit',
+      when: s => isCreepFull(s.name),
+    },
+  ])
 
   if (!carrier.data?.huntingGround) return
 
   const huntingGround = deserializePos(carrier.data?.huntingGround)
 
-  if (isCreepFull(carrier.name)) nextTask = 'deposit'
-  else if (isCreepEmpty(carrier.name)) nextTask = 'fill'
-  else if ([TaskNames.pickUp, TaskNames.withdraw].includes(carrier.task?.name))
-    nextTask = 'fill'
-  else nextTask = 'deposit'
-
   let task
-  switch (nextTask) {
-    case 'fill':
-      task = taskForPriority([
-        {
-          name: TaskNames.pickUp,
-          getTarget: () =>
-            huntingGround
-              .lookFor(LOOK_RESOURCES)
-              .sort((a, b) => a.amount - b.amount)[0],
-        },
-        {
-          name: TaskNames.withdraw,
-          getTarget: () =>
-            huntingGround
-              .lookFor(LOOK_STRUCTURES)
-              .filter(
-                structure => structure.structureType === STRUCTURE_CONTAINER,
-              )[0] as AnyStoreStructure,
-        },
-      ])
-      break
+  switch (phase) {
     case 'deposit':
       task = taskForPriority([
         {
           name: TaskNames.store,
-          getTarget: () =>
-            nestFind(carrier.nest, FIND_STRUCTURES, {
+          getTarget: () => {
+            const stores = nestFind(carrier.nest, FIND_STRUCTURES, {
               filter: structure =>
                 oneOfStructures(structure, [
                   STRUCTURE_SPAWN,
@@ -58,7 +48,10 @@ const createCarrierTask = (carrier: Carrier) => {
                 (structure as AnyStoreStructure).store.getFreeCapacity(
                   RESOURCE_ENERGY,
                 ) > 0,
-            }),
+            })
+            if (!stores.length) return null
+            return sortByRange(stores, creepForName(carrier.name).pos)[0]?.id
+          },
         },
         {
           name: TaskNames.store,
@@ -73,6 +66,28 @@ const createCarrierTask = (carrier: Carrier) => {
         },
       ])
       break
+
+    case 'fill':
+    default:
+      task = taskForPriority([
+        {
+          name: TaskNames.pickUp,
+          getTarget: () =>
+            huntingGround
+              .lookFor(LOOK_RESOURCES)
+              .sort((a, b) => a.amount - b.amount)[0]?.id,
+        },
+        {
+          name: TaskNames.withdraw,
+          getTarget: () =>
+            huntingGround
+              .lookFor(LOOK_STRUCTURES)
+              .filter(
+                structure => structure.structureType === STRUCTURE_CONTAINER,
+              )[0] as AnyStoreStructure,
+        },
+      ])
+      break
   }
   if (task) carrier.task = task
 }
@@ -80,7 +95,7 @@ const createCarrierTask = (carrier: Carrier) => {
 export const run: Goal['run'] = nest => {
   hooks(nest)
 
-  const spoods = nestSpoods(nest)
+  const spoods = nestGoalSpoods(nest, GoalNames.hunting)
   const carriers = spoods.filter(
     spood => spood.type === Spooders.carrier,
   ) as Carrier[]

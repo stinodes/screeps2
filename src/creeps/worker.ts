@@ -1,8 +1,9 @@
-import {LayEgg, Spooders} from 'creeps'
-import {creepForName} from './helpers'
+import { LayEgg, Spooders } from 'creeps'
+import { creepForName } from './helpers'
 import {
   harvest,
   pickUp,
+  repair,
   store,
   Task,
   TaskNames,
@@ -13,9 +14,11 @@ import {
 export type WorkerTask =
   | Task<TaskNames.harvest, Source>
   | Task<TaskNames.pickUp, Resource>
+  | Task<TaskNames.withdraw, AnyStoreStructure>
   | Task<TaskNames.store, AnyStoreStructure>
   | Task<TaskNames.upgrade, null, null>
   | Task<TaskNames.weave, ConstructionSite>
+  | Task<TaskNames.repair, AnyStructure>
 
 export type Worker = CreepMemory & {
   type: Spooders.worker
@@ -25,6 +28,7 @@ export type Worker = CreepMemory & {
   data?: {
     upgrader?: boolean
     source?: Id<Source>
+    phase?: 'gather' | 'use'
   }
 }
 
@@ -36,10 +40,11 @@ export const layWorkerEgg: LayEgg<Worker['data']> = (
   type: Spooders.worker,
   body: {
     parts: {
-      [WORK]: 2,
+      [WORK]: 1,
       [CARRY]: 1,
       [MOVE]: 1,
     },
+    grow: true,
   },
   goal,
   data: data,
@@ -47,7 +52,7 @@ export const layWorkerEgg: LayEgg<Worker['data']> = (
   priority,
 })
 
-export const worker = ({name, task}: Worker) => {
+export const worker = ({ name, task }: Worker) => {
   const creep = creepForName(name)
 
   switch (task?.name) {
@@ -59,10 +64,12 @@ export const worker = ({name, task}: Worker) => {
       return store(creep, task)
     case TaskNames.weave:
       return weave(creep, task)
+    case TaskNames.repair:
+      return repair(creep, task)
     case TaskNames.upgrade:
       return upgrade(creep, task)
     default:
-      ; (task as Task<any, any>).complete = true
+      ;(task as Task<any, any>).complete = true
       return task
   }
 }

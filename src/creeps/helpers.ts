@@ -46,6 +46,14 @@ export const creepBuild = (creep: Creep, site: ConstructionSite) => {
   return result
 }
 
+export const creepRepair = (creep: Creep, structure: Structure) => {
+  if (!structure) return
+  creep.say('🕸️')
+  const result = creep.repair(structure)
+  if (result === ERR_NOT_IN_RANGE) return creep.moveTo(structure)
+  return result
+}
+
 export const creepUpgrade = (creep: Creep) => {
   const controller = creep.room.controller
   if (!controller) return

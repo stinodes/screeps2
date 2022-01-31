@@ -5,6 +5,9 @@ export type Body = {
   grow?: boolean
 }
 
+const sumPrice = (parts: BodyPartConstant[]) =>
+  parts.reduce((v, p) => v + BODYPART_COST[p], 0)
+
 export const createBody = (b: Body, energy: number = 300) => {
   const partsArray = (Object.keys(b.parts) as BodyPartConstant[]).reduce(
     (prev, p) => {
@@ -15,7 +18,18 @@ export const createBody = (b: Body, energy: number = 300) => {
   )
   if (!b.grow) return partsArray
 
-  const partsPrice = partsArray.reduce((v, p) => v + BODYPART_COST[p], 0)
-  const factor = Math.floor(energy / partsPrice)
-  return _.flatten(new Array(factor).fill(partsArray))
+  const partsPrice = sumPrice(partsArray)
+  const factor = energy / partsPrice
+  const ceilFactor = Math.ceil(factor)
+
+  const scaledBody = _.flatten(new Array(ceilFactor).fill(partsArray)).reduce(
+    (prev, part) => {
+      const newArr = [...prev, part]
+      if (sumPrice(newArr) <= energy) return newArr
+      return prev
+    },
+    [],
+  )
+
+  return scaledBody
 }

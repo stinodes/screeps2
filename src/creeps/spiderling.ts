@@ -1,5 +1,5 @@
-import {LayEgg, Spooders} from 'creeps'
-import {creepForName} from './helpers'
+import { LayEgg, Spooders } from 'creeps'
+import { creepForName } from './helpers'
 import {
   harvest,
   pickUp,
@@ -25,13 +25,14 @@ export type Spiderling = CreepMemory & {
   data?: {
     upgrader?: boolean
     source?: Id<Source>
+    phase?: 'gather' | 'use'
   }
 }
 
 export const laySpiderlingEgg: LayEgg<Spiderling['data']> = (
   goal,
   data,
-  priority = 2,
+  priority = 1,
 ) => ({
   type: Spooders.spiderling,
   body: {
@@ -47,7 +48,7 @@ export const laySpiderlingEgg: LayEgg<Spiderling['data']> = (
   priority,
 })
 
-export const spiderling = ({name, task}: Spiderling) => {
+export const spiderling = ({ name, task }: Spiderling) => {
   const creep = creepForName(name)
 
   switch (task?.name) {
@@ -62,7 +63,7 @@ export const spiderling = ({name, task}: Spiderling) => {
     case TaskNames.upgrade:
       return upgrade(creep, task)
     default:
-      ; (task as Task<any, any>).complete = true
+      ;(task as Task<any, any>).complete = true
       return task
   }
 }

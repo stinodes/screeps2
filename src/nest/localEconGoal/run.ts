@@ -1,40 +1,164 @@
+import { config } from 'config'
 import { Spooders } from 'creeps'
-import { creepForName, isCreepEmpty } from 'creeps/helpers'
+import { creepForName, isCreepEmpty, isCreepFull } from 'creeps/helpers'
 import { TaskNames } from 'creeps/tasks'
+import { creepPhase, taskForPriority } from 'creeps/tasks/taskPriority'
 import { Worker, worker, WorkerTask } from 'creeps/worker'
 import {
   getEmptyAdjecentSquares,
   nestFind,
+  nestGoalData,
   nestGoalSpoods,
+  nestMarker,
   nestRoom,
   nestSpoods,
   oneOfStructures,
   sortByRange,
+  structureNeedsRepair,
 } from 'nest/helpers'
 import { Goal, GoalNames } from 'nest/types'
-import { hooks } from './hooks'
+import { deserializePos } from 'utils/helpers'
+import { hooks, LocalEconData } from './hooks'
 
-const createNewWorkerTask = (
-  { stores, sites }: { stores: AnyStoreStructure[]; sites: ConstructionSite[] },
-  s: Worker,
-): WorkerTask => {
-  const creep = creepForName(s.name)
-  if (stores.length) {
-    const sortedStores = sortByRange(stores, creep.pos)
-    return {
-      name: TaskNames.store,
-      target: sortedStores[0].id,
-    }
-  }
-  if (sites.length) {
-    const sortedSites = sortByRange(sites, creep.pos)
-    return {
-      name: TaskNames.weave,
-      target: sortedSites[0].id,
-    }
+const createWorkerEmergencyTask = (
+  { stores }: { stores: AnyStoreStructure[] },
+  worker: Worker,
+) => {
+  const phase = creepPhase(worker, [
+    {
+      name: 'gather',
+      when: s => isCreepEmpty(s.name),
+    },
+
+    {
+      name: 'use',
+      when: s => isCreepFull(s.name),
+    },
+  ])
+
+  let task: null | WorkerTask = null
+
+  switch (phase) {
+    case 'use':
+      task = taskForPriority([
+        {
+          name: TaskNames.store,
+          getTarget: () => stores[0]?.id,
+        },
+        { name: TaskNames.upgrade },
+      ])
+      break
+    case 'gather':
+    default:
+      task = taskForPriority([
+        {
+          name: TaskNames.pickUp,
+          getTarget: () =>
+            creepForName(worker.name).pos.findClosestByPath(
+              FIND_DROPPED_RESOURCES,
+            )?.id,
+        },
+        {
+          name: TaskNames.harvest,
+          getTarget: () => getFreeSource(worker.nest, worker)?.id,
+        },
+      ])
+      break
   }
 
-  return { name: TaskNames.upgrade, target: null }
+  if (task) worker.task = task
+}
+
+const createWorkerTask = (
+  { sites }: { stores: AnyStoreStructure[]; sites: ConstructionSite[] },
+  worker: Worker,
+) => {
+  const storagePos = deserializePos(nestMarker(worker.nest, 'storage'))
+  const structures = nestFind(worker.nest, FIND_STRUCTURES)
+
+  const towers = structures.filter(struct =>
+    oneOfStructures(struct, [STRUCTURE_TOWER]),
+  )
+  const toFill = structures.filter(
+    struct =>
+      (struct as AnyStoreStructure).store?.getFreeCapacity(RESOURCE_ENERGY) >
+        0 &&
+      oneOfStructures(struct, [
+        STRUCTURE_TOWER,
+        STRUCTURE_EXTENSION,
+        STRUCTURE_SPAWN,
+      ]),
+  ) as AnyStoreStructure[]
+  const toRepair = structures.filter(struct => structureNeedsRepair(struct, 2))
+
+  const phase = creepPhase(worker, [
+    {
+      name: 'gather',
+      when: s => isCreepEmpty(s.name),
+    },
+
+    {
+      name: 'use',
+      when: s => isCreepFull(s.name),
+    },
+  ])
+
+  let task: null | WorkerTask = null
+
+  switch (phase) {
+    case 'use':
+      if (worker.data?.upgrader)
+        task = { name: TaskNames.upgrade, target: null }
+      else
+        task = taskForPriority([
+          {
+            name: TaskNames.store,
+            getTarget: () =>
+              sortByRange(toFill, creepForName(worker.name).pos)[0]?.id,
+          },
+          {
+            name: TaskNames.repair,
+            getTarget: () =>
+              towers.length === 0
+                ? sortByRange(toRepair, creepForName(worker.name).pos)[0]?.id
+                : null,
+          },
+          {
+            name: TaskNames.weave,
+            getTarget: () => sites[0]?.id,
+          },
+          { name: TaskNames.upgrade },
+        ])
+      break
+    case 'gather':
+    default:
+      task = taskForPriority([
+        {
+          name: TaskNames.pickUp,
+          getTarget: () => storagePos.lookFor(LOOK_RESOURCES)[0]?.id,
+        },
+        {
+          name: TaskNames.withdraw,
+          getTarget: () =>
+            storagePos
+              .lookFor(LOOK_STRUCTURES)
+              .filter(struct =>
+                oneOfStructures(struct as any, [STRUCTURE_STORAGE]),
+              )[0]?.id as Id<AnyStoreStructure>,
+        },
+        {
+          name: TaskNames.pickUp,
+          getTarget: () => storagePos.lookFor(LOOK_RESOURCES)[0]?.id,
+        },
+        {
+          name: TaskNames.harvest,
+          getTarget: () => getFreeSource(worker.nest, worker)?.id,
+        },
+      ])
+      break
+  }
+
+  if (task) worker.task = task
 }
 
 const getFreeSource = (nest: string, s: Worker) => {
@@ -52,6 +176,8 @@ const getFreeSource = (nest: string, s: Worker) => {
 export const run: Goal['run'] = (nest: string) => {
   hooks(nest)
 
+  const data = nestGoalData(nest, GoalNames.localEcon) as LocalEconData
+
   const spoods = nestGoalSpoods(nest, GoalNames.localEcon)
   const workers = spoods.filter(s => s.type === Spooders.worker) as Worker[]
   const workersWithCompleteTask = workers.filter(
@@ -66,36 +192,10 @@ export const run: Goal['run'] = (nest: string) => {
   const constructionSites = nestFind(nest, FIND_CONSTRUCTION_SITES)
 
   workersWithCompleteTask.forEach(s => {
-    if (s.task && [TaskNames.harvest, TaskNames.pickUp].includes(s.task.name)) {
-      if (s.data?.upgrader) s.task = { name: TaskNames.upgrade, target: null }
-      else
-        s.task = createNewWorkerTask(
-          { stores: unfilledStores, sites: constructionSites },
-          s,
-        )
-    } else {
-      const source = getFreeSource(nest, s)
-      const resource = creepForName(s.name).pos.findClosestByPath(
-        FIND_DROPPED_RESOURCES,
-      )
-
-      if (!isCreepEmpty(s.name)) {
-        s.task = createNewWorkerTask(
-          { stores: unfilledStores, sites: constructionSites },
-          s,
-        )
-      } else if (resource) {
-        s.task = {
-          name: TaskNames.pickUp,
-          target: resource.id,
-        }
-      } else if (source) {
-        s.task = {
-          name: TaskNames.harvest,
-          target: source.id,
-        }
-      }
-    }
+    if (data.status === 'unhealthy')
+      createWorkerEmergencyTask({ stores: unfilledStores }, s)
+    else
+      createWorkerTask({ stores: unfilledStores, sites: constructionSites }, s)
   })
 
   spoods.forEach(spood => {

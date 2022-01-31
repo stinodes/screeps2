@@ -1,9 +1,11 @@
+import { config } from 'config'
 import { deserializePos } from 'utils/helpers'
 import {
   creepBuild,
   creepDrop,
   creepHarvest,
   creepPickUp,
+  creepRepair,
   creepTransfer,
   creepUpgrade,
   creepWithdraw,
@@ -17,6 +19,7 @@ export enum TaskNames {
   withdraw = 'withdraw',
   upgrade = 'upgrade',
   weave = 'weave',
+  repair = 'repair',
 }
 
 export type Task<Name extends TaskNames, TargetId, Target = Id<TargetId>> = {
@@ -60,7 +63,7 @@ export const store = (
 
 export const drop = (
   creep: Creep,
-  task: Task<TaskNames.store, null, string>,
+  task: Task<TaskNames.drop, null, string>,
 ) => {
   const pos = deserializePos(task.target)
   if (pos && !!creep.store.getUsedCapacity(RESOURCE_ENERGY)) {
@@ -97,6 +100,25 @@ export const weave = (
   ) {
     task.progress = true
     creepBuild(creep, target)
+  } else {
+    task.complete = true
+  }
+  return task
+}
+
+export const repair = (
+  creep: Creep,
+  task: Task<TaskNames.repair, AnyStructure>,
+) => {
+  const target = Game.getObjectById(task.target)
+  if (
+    target &&
+    creep.store.getUsedCapacity(RESOURCE_ENERGY) &&
+    target.hits < target.hitsMax &&
+    target.hits < config.maxHits
+  ) {
+    task.progress = true
+    creepRepair(creep, target)
   } else {
     task.complete = true
   }
