@@ -1,3 +1,3 @@
 export const config = {
-  maxHits: 5000,
+  maxHits: 25000,
 }

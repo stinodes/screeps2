@@ -101,7 +101,7 @@ const hatchEggs = (nest: Nest) => {
 
   if (towers.length) {
     const toAttack = nestFind(nest.name, FIND_HOSTILE_CREEPS)
-    const toRepair = nestFind(nest.name, FIND_MY_STRUCTURES).filter(
+    const toRepair = nestFind(nest.name, FIND_STRUCTURES).filter(
       structureNeedsRepair,
     )
     towers.forEach(t => {

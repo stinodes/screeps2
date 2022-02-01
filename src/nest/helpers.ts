@@ -1,6 +1,6 @@
-import { config } from 'config'
-import { Task } from 'creeps/tasks'
-import { GoalNames } from './types'
+import {config} from 'config'
+import {Task} from 'creeps/tasks'
+import {GoalNames} from './types'
 
 export const nestMem = (nest: string) => Memory.nests[nest]
 
@@ -19,10 +19,10 @@ export const nestLevel = (nest: string) => nestRoom(nest).controller?.level || 0
 export const nestFind = <
   C extends FindConstant,
   FT extends FindTypes[C] = FindTypes[C],
->(
-  nest: string,
-  findC: C,
-  opts?: FilterOptions<C, FT>,
+  >(
+    nest: string,
+    findC: C,
+    opts?: FilterOptions<C, FT>,
 ) => nestRoom(nest).find(findC, opts)
 
 export const nestSpoods = (nest: string) =>
@@ -36,16 +36,16 @@ export const nestGoalSpoods = (nest: string, goal: string) =>
 export const oneOfStructures = <
   S extends AnyStructure,
   T extends StructureConstant,
->(
-  structure: S,
-  types: T[],
+  >(
+    structure: S,
+    types: T[],
 ) => types.includes(structure.structureType as T)
 
 export const sortByRange = <O extends RoomObject>(o: O[], pos: RoomPosition) =>
   o
-    .map(obj => ({ value: obj, range: pos.findPathTo(obj.pos).length }))
+    .map(obj => ({value: obj, range: pos.findPathTo(obj.pos).length}))
     .sort((a, b) => a.range - b.range)
-    .map(({ value }) => value)
+    .map(({value}) => value)
 
 export const relativePos = (pos: RoomPosition, dx: number, dy: number) =>
   new RoomPosition(pos.x + dx, pos.y + dy, pos.roomName)
@@ -83,7 +83,7 @@ export const getFreeSources = (nest: string) => {
   const sources = room.find(FIND_SOURCES).filter(source => {
     const adjSq = getEmptyAdjecentSquares(source.pos)
     const spoods = (
-      nestSpoods(nest) as (CreepMemory & { task?: Task<any, any> })[]
+      nestSpoods(nest) as (CreepMemory & {task?: Task<any, any>})[]
     ).filter(s => s.task?.target === source.id)
     return spoods.length <= adjSq.length
   })
@@ -105,5 +105,5 @@ export const structureNeedsRepair = (
   structure: AnyStructure,
   minFactor: number = 1,
 ) =>
-  Math.min(config.maxHits, structure.hits) < structure.hitsMax / minFactor &&
-  Math.min(structure.hits, config.maxHits) < config.maxHits / minFactor
+  structure.hits < structure.hitsMax &&
+  structure.hits < config.maxHits
