@@ -1,5 +1,5 @@
-import { LayEgg, Spooders } from 'creeps'
-import { creepForName } from './helpers'
+import {LayEgg, Spooders} from 'creeps'
+import {creepForName} from './helpers'
 import {
   harvest,
   pickUp,
@@ -15,7 +15,7 @@ import {
 export type WorkerTask =
   | Task<TaskNames.harvest, Source>
   | Task<TaskNames.pickUp, Resource>
-  | Task<TaskNames.withdraw, AnyStoreStructure>
+  | Task<TaskNames.withdraw, AnyStoreStructure | Tombstone>
   | Task<TaskNames.store, AnyStoreStructure>
   | Task<TaskNames.upgrade, null, null>
   | Task<TaskNames.weave, ConstructionSite>
@@ -53,7 +53,7 @@ export const layWorkerEgg: LayEgg<Worker['data']> = (
   priority,
 })
 
-export const worker = ({ name, task }: Worker) => {
+export const worker = ({name, task}: Worker) => {
   const creep = creepForName(name)
 
   switch (task?.name) {
@@ -72,7 +72,7 @@ export const worker = ({ name, task }: Worker) => {
     case TaskNames.upgrade:
       return upgrade(creep, task)
     default:
-      ;(task as Task<any, any>).complete = true
+      ; (task as Task<any, any>).complete = true
       return task
   }
 }

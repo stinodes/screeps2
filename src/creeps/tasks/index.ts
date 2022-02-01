@@ -1,5 +1,5 @@
-import { config } from 'config'
-import { deserializePos } from 'utils/helpers'
+import {config} from 'config'
+import {deserializePos} from 'utils/helpers'
 import {
   creepBuild,
   creepDrop,
@@ -145,7 +145,7 @@ export const pickUp = (
 
 export const withdraw = (
   creep: Creep,
-  task: Task<TaskNames.withdraw, AnyStoreStructure>,
+  task: Task<TaskNames.withdraw, AnyStoreStructure | Tombstone>,
 ) => {
   const store = Game.getObjectById(task.target)
   if (

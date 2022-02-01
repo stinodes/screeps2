@@ -1,19 +1,20 @@
-import { Spooders } from 'creeps'
-import { carrier, Carrier } from 'creeps/carrier'
-import { creepForName, isCreepEmpty, isCreepFull } from 'creeps/helpers'
-import { Hunter, hunter } from 'creeps/hunter'
-import { TaskNames } from 'creeps/tasks'
-import { creepPhase, taskForPriority } from 'creeps/tasks/taskPriority'
+import {Spooders} from 'creeps'
+import {carrier, Carrier} from 'creeps/carrier'
+import {creepForName, isCreepEmpty, isCreepFull} from 'creeps/helpers'
+import {Hunter, hunter} from 'creeps/hunter'
+import {TaskNames} from 'creeps/tasks'
+import {creepPhase, taskForPriority} from 'creeps/tasks/taskPriority'
 import {
   nestFind,
   nestGoalSpoods,
   nestMarker,
   oneOfStructures,
+  relativePos,
   sortByRange,
 } from 'nest/helpers'
-import { Goal, GoalNames } from 'nest/types'
-import { deserializePos } from 'utils/helpers'
-import { hooks } from './hooks'
+import {Goal, GoalNames} from 'nest/types'
+import {deserializePos, serializePos} from 'utils/helpers'
+import {hooks} from './hooks'
 
 const createCarrierTask = (carrier: Carrier) => {
   const phase = creepPhase(carrier, [
@@ -57,12 +58,18 @@ const createCarrierTask = (carrier: Carrier) => {
           name: TaskNames.store,
           getTarget: () =>
             nestFind(carrier.nest, FIND_STRUCTURES, {
-              filter: { structureType: STRUCTURE_STORAGE },
-            })[0],
+              filter: {structureType: STRUCTURE_STORAGE},
+            })[0]?.id,
         },
         {
           name: TaskNames.drop,
-          getTarget: () => nestMarker(carrier.nest, 'storage'),
+          getTarget: () =>
+            serializePos(
+              relativePos(
+                deserializePos(
+                  nestMarker(carrier.nest, 'storage')
+                ), 0, -1)
+            ),
         },
       ])
       break

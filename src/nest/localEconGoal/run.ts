@@ -1,4 +1,3 @@
-import {config} from 'config'
 import {Spooders} from 'creeps'
 import {creepForName, isCreepEmpty, isCreepFull} from 'creeps/helpers'
 import {TaskNames} from 'creeps/tasks'
@@ -13,6 +12,7 @@ import {
   nestRoom,
   nestSpoods,
   oneOfStructures,
+  relativePos,
   sortByRange,
   structureNeedsRepair,
 } from 'nest/helpers'
@@ -74,7 +74,9 @@ const createWorkerTask = (
   {sites}: {stores: AnyStoreStructure[]; sites: ConstructionSite[]},
   worker: Worker,
 ) => {
-  const huntingGrounds = (nestGoalData(worker.nest, GoalNames.hunting) as HuntingData).huntingGrounds
+  const huntingGrounds = (
+    nestGoalData(worker.nest, GoalNames.hunting) as HuntingData
+  ).huntingGrounds
   const storagePos = deserializePos(nestMarker(worker.nest, 'storage'))
   const structures = nestFind(worker.nest, FIND_STRUCTURES)
 
@@ -135,13 +137,18 @@ const createWorkerTask = (
     case 'gather':
     default:
       task = taskForPriority([
+        {name: TaskNames.withdraw, getTarget: () => creepForName(worker.name).pos.findClosestByPath(FIND_TOMBSTONES)?.id},
         {
           name: TaskNames.pickUp,
-          getTarget: () => storagePos.lookFor(LOOK_RESOURCES)[0]?.id,
+          getTarget: () =>
+            creepForName(worker.name).pos.findClosestByPath(
+              FIND_DROPPED_RESOURCES,
+              {filter: resource => resource.amount > 100},
+            )?.id,
         },
         {
           name: TaskNames.pickUp,
-          getTarget: () => storagePos.lookFor(LOOK_RESOURCES)[0]?.id,
+          getTarget: () => relativePos(storagePos, 0, -1).lookFor(LOOK_RESOURCES)[0]?.id,
         },
         {
           name: TaskNames.withdraw,
@@ -155,20 +162,27 @@ const createWorkerTask = (
         {
           name: TaskNames.withdraw,
           getTarget: () =>
-            huntingGrounds ?
-              sortByRange(
+            huntingGrounds
+              ? sortByRange(
                 huntingGrounds
                   .map(
                     pos =>
                       deserializePos(pos)
                         .lookFor(LOOK_STRUCTURES)
-                        .filter(struct =>
-                          oneOfStructures(struct as any, [STRUCTURE_CONTAINER]) && (struct as AnyStoreStructure).store.getUsedCapacity(RESOURCE_ENERGY) > 0,
-                        )[0] as AnyStoreStructure
+                        .filter(
+                          struct =>
+                            oneOfStructures(struct as any, [
+                              STRUCTURE_CONTAINER,
+                            ]) &&
+                            (
+                              struct as AnyStoreStructure
+                            ).store.getUsedCapacity(RESOURCE_ENERGY) > 100,
+                        )[0] as AnyStoreStructure,
                   )
                   .filter(Boolean),
-                creepForName(worker.name).pos
-              )[0]?.id : null,
+                creepForName(worker.name).pos,
+              )[0]?.id
+              : null,
         },
         {
           name: TaskNames.harvest,

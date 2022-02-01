@@ -72,7 +72,7 @@ export const creepPickUp = (creep: Creep, resource: Resource) => {
 
 export const creepWithdraw = (
   creep: Creep,
-  store: AnyStoreStructure,
+  store: AnyStoreStructure | Tombstone,
   resource: ResourceConstant = RESOURCE_ENERGY,
 ) => {
   creep.say('🪰')

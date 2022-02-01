@@ -20,7 +20,7 @@ export const localEconGoal: Goal = {
     const upgraders = spoods.filter(s => s.data?.upgrader)
     const nUpgraders = 2
     const minWorkers = 1
-    const maxWorkers = 6
+    const maxWorkers = 3
 
     const requiredProgress = nestFind(nest, FIND_CONSTRUCTION_SITES).reduce(
       (total, site) => {
