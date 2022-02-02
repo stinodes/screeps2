@@ -1,5 +1,6 @@
 import {LayEgg, Spooders} from 'creeps'
 import {SerializedPosition} from 'utils/helpers'
+import {ColonyCarrier} from './colonyCarrier'
 import {creepForName} from './helpers'
 import {drop, pickUp, store, Task, TaskNames, withdraw} from './tasks'
 
@@ -37,7 +38,7 @@ export const layCarrierEgg: LayEgg<Carrier['data']> = (
   priority,
 })
 
-export const carrier = ({task, name}: Carrier) => {
+export const carrier = ({task, name}: ColonyCarrier | Carrier) => {
   const creep = creepForName(name)
   switch (task?.name) {
     case TaskNames.pickUp:

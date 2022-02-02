@@ -13,6 +13,7 @@ import { huntingGoal } from './huntingGoal'
 import { localEconGoal } from './localEconGoal'
 import { startUpGoal } from './startUpGoal'
 import { Goal, GoalNames, Nest } from './types'
+import { colonyEconGoal } from './colonyEconGoal'
 
 export const createNest = (roomName: string): Nest => {
   const room = Game.rooms[roomName]
@@ -28,6 +29,8 @@ export const createNest = (roomName: string): Nest => {
     name: roomName,
     [GoalNames.startUp]: {},
     [GoalNames.hunting]: {},
+    [GoalNames.localEcon]: {},
+    [GoalNames.colonyEcon]: {},
 
     markers,
   }
@@ -36,7 +39,7 @@ export const createNest = (roomName: string): Nest => {
 const goals: { [nest: string]: Goal[] } = {}
 const getGoals = (nestName: string) => {
   if (!goals[nestName]) {
-    goals[nestName] = [startUpGoal, localEconGoal, huntingGoal]
+    goals[nestName] = [startUpGoal, localEconGoal, huntingGoal, colonyEconGoal]
   }
   // DONT RETURN IRRELEVANT GOALS
   return goals[nestName].filter(

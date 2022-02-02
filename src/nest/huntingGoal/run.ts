@@ -1,20 +1,18 @@
-import {Spooders} from 'creeps'
-import {carrier, Carrier} from 'creeps/carrier'
-import {creepForName, isCreepEmpty, isCreepFull} from 'creeps/helpers'
-import {Hunter, hunter} from 'creeps/hunter'
-import {TaskNames} from 'creeps/tasks'
-import {creepPhase, taskForPriority} from 'creeps/tasks/taskPriority'
+import { Spooders } from 'creeps'
+import { carrier, Carrier, CarrierTask } from 'creeps/carrier'
+import { isCreepEmpty, isCreepFull } from 'creeps/helpers'
+import { Hunter, hunter } from 'creeps/hunter'
 import {
-  nestFind,
-  nestGoalSpoods,
-  nestMarker,
-  oneOfStructures,
-  relativePos,
-  sortByRange,
-} from 'nest/helpers'
-import {Goal, GoalNames} from 'nest/types'
-import {deserializePos, serializePos} from 'utils/helpers'
-import {hooks} from './hooks'
+  dropStoragePosTask,
+  pickUpHuntingGroundResourceTask,
+  storeExtensionsTask,
+  storeStorageTask,
+  withdrawHuntingGroundTask,
+} from 'creeps/tasks/taskCreators'
+import { creepPhase, taskForPriority } from 'creeps/tasks/taskPriority'
+import { nestGoalSpoods } from 'nest/helpers'
+import { Goal, GoalNames } from 'nest/types'
+import { hooks } from './hooks'
 
 const createCarrierTask = (carrier: Carrier) => {
   const phase = creepPhase(carrier, [
@@ -29,70 +27,21 @@ const createCarrierTask = (carrier: Carrier) => {
     },
   ])
 
-  if (!carrier.data?.huntingGround) return
-
-  const huntingGround = deserializePos(carrier.data?.huntingGround)
-
   let task
   switch (phase) {
     case 'deposit':
-      task = taskForPriority([
-        {
-          name: TaskNames.store,
-          getTarget: () => {
-            const stores = nestFind(carrier.nest, FIND_STRUCTURES, {
-              filter: structure =>
-                oneOfStructures(structure, [
-                  STRUCTURE_SPAWN,
-                  STRUCTURE_EXTENSION,
-                ]) &&
-                (structure as AnyStoreStructure).store.getFreeCapacity(
-                  RESOURCE_ENERGY,
-                ) > 0,
-            })
-            if (!stores.length) return null
-            return sortByRange(stores, creepForName(carrier.name).pos)[0]?.id
-          },
-        },
-        {
-          name: TaskNames.store,
-          getTarget: () =>
-            nestFind(carrier.nest, FIND_STRUCTURES, {
-              filter: {structureType: STRUCTURE_STORAGE},
-            })[0]?.id,
-        },
-        {
-          name: TaskNames.drop,
-          getTarget: () =>
-            serializePos(
-              relativePos(
-                deserializePos(
-                  nestMarker(carrier.nest, 'storage')
-                ), 0, -1)
-            ),
-        },
+      task = taskForPriority<CarrierTask>([
+        storeExtensionsTask(carrier),
+        storeStorageTask(carrier),
+        dropStoragePosTask(carrier),
       ])
       break
 
     case 'fill':
     default:
-      task = taskForPriority([
-        {
-          name: TaskNames.pickUp,
-          getTarget: () =>
-            huntingGround
-              .lookFor(LOOK_RESOURCES)
-              .sort((a, b) => a.amount - b.amount)[0]?.id,
-        },
-        {
-          name: TaskNames.withdraw,
-          getTarget: () =>
-            huntingGround
-              .lookFor(LOOK_STRUCTURES)
-              .filter(
-                structure => structure.structureType === STRUCTURE_CONTAINER,
-              )[0]?.id as Id<AnyStoreStructure>,
-        },
+      task = taskForPriority<CarrierTask>([
+        pickUpHuntingGroundResourceTask(carrier),
+        withdrawHuntingGroundTask(carrier),
       ])
       break
   }

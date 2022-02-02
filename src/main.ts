@@ -2,6 +2,7 @@ import { Spooders } from 'creeps'
 import { createNest, nest } from 'nest'
 import { Nest } from 'nest/types'
 import { ErrorMapper } from 'utils/ErrorMapper'
+import { SerializedPosition } from 'utils/helpers'
 
 declare global {
   /*
@@ -21,6 +22,9 @@ declare global {
     log: any
   }
 
+  interface RoomMemory {
+    huntingGrounds?: SerializedPosition[]
+  }
   interface CreepMemory {
     name: string
     type: Spooders
@@ -35,6 +39,7 @@ declare global {
   namespace NodeJS {
     interface Global {
       log: any
+      addColonyCandidate(nest: string, candidate: string): void
     }
   }
 }

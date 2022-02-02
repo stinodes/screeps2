@@ -1,15 +1,16 @@
 import { Spooders } from 'creeps'
 import { creepForName, isCreepEmpty, isCreepFull } from 'creeps/helpers'
 import { spiderling, Spiderling, SpiderlingTask } from 'creeps/spiderling'
-import { Task, TaskNames } from 'creeps/tasks'
-import { taskForPriority } from 'creeps/tasks/taskPriority'
+import { TaskNames } from 'creeps/tasks'
 import {
-  getFreeSources,
-  nestFind,
-  nestGoalSpoods,
-  oneOfStructures,
-  sortByRange,
-} from 'nest/helpers'
+  harvestFreeSourceTask,
+  pickUpResourceTask,
+  storeExtensionsTask,
+  upgradeControllerTask,
+  weaveTask,
+} from 'creeps/tasks/taskCreators'
+import { taskForPriority } from 'creeps/tasks/taskPriority'
+import { getFreeSources, nestGoalSpoods, sortByRange } from 'nest/helpers'
 import { Goal, GoalNames } from 'nest/types'
 import { hooks } from './hooks'
 
@@ -18,10 +19,7 @@ export const getFreeSource = (nest: string, s: Spiderling) => {
   return sortByRange(sources, creepForName(s.name).pos)[0]
 }
 
-const createSpiderlingTask = (
-  { stores, sites }: { stores: AnyStoreStructure[]; sites: ConstructionSite[] },
-  s: Spiderling,
-) => {
+const createSpiderlingTask = (s: Spiderling) => {
   let nextTask
   if (isCreepEmpty(s.name)) nextTask = 'gather'
   else if (isCreepFull(s.name)) nextTask = 'use'
@@ -34,31 +32,17 @@ const createSpiderlingTask = (
     case 'use':
       if (s.data?.upgrader) task = { name: TaskNames.upgrade, target: null }
       else
-        task = taskForPriority([
-          {
-            name: TaskNames.store,
-            getTarget: () => stores[0]?.id,
-          },
-          {
-            name: TaskNames.weave,
-            getTarget: () => sites[0]?.id,
-          },
-          { name: TaskNames.upgrade },
+        task = taskForPriority<SpiderlingTask>([
+          storeExtensionsTask(s),
+          weaveTask(s),
+          upgradeControllerTask(s),
         ])
       break
     case 'gather':
     default:
-      task = taskForPriority([
-        {
-          name: TaskNames.pickUp,
-          getTarget: () =>
-            creepForName(s.name).pos.findClosestByPath(FIND_DROPPED_RESOURCES)
-              ?.id,
-        },
-        {
-          name: TaskNames.harvest,
-          getTarget: () => getFreeSource(s.nest, s)?.id,
-        },
+      task = taskForPriority<SpiderlingTask>([
+        pickUpResourceTask(s),
+        harvestFreeSourceTask(s),
       ])
       break
   }
@@ -77,18 +61,8 @@ export const run: Goal['run'] = (nest: string) => {
     s => !s.task || s.task.complete,
   )
 
-  const unfilledStores = nestFind(nest, FIND_STRUCTURES, {
-    filter: (struct: AnyStoreStructure) =>
-      oneOfStructures(struct, [STRUCTURE_SPAWN, STRUCTURE_EXTENSION]) &&
-      struct.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
-  }) as AnyStoreStructure[]
-  const constructionSites = nestFind(nest, FIND_CONSTRUCTION_SITES)
-
   spiderlingsWithCompleteTask.forEach(s => {
-    createSpiderlingTask(
-      { stores: unfilledStores, sites: constructionSites },
-      s,
-    )
+    createSpiderlingTask(s)
   })
 
   spoods.forEach(spood => {

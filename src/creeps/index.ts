@@ -7,6 +7,10 @@ export enum Spooders {
   hunter = 'hunter',
   carrier = 'carrier',
   worker = 'worker',
+
+  colonyWorker = 'colony-worker',
+  colonyHunter = 'colony-hunter',
+  colonyCarrier = 'colony-carrier',
 }
 
 export type Egg = {

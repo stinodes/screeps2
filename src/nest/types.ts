@@ -1,4 +1,5 @@
 import { Egg } from 'creeps'
+import { ColonyEconData } from './colonyEconGoal/hooks'
 import { HuntingData } from './huntingGoal/hooks'
 import { LocalEconData } from './localEconGoal/hooks'
 import { StartUpData } from './startUpGoal/hooks'
@@ -7,6 +8,7 @@ export enum GoalNames {
   startUp = 'startUp',
   hunting = 'hunting',
   localEcon = 'localEcon',
+  colonyEcon = 'colonyEcon',
 }
 
 export type Nest = {
@@ -19,6 +21,7 @@ export type Nest = {
   [GoalNames.startUp]?: StartUpData
   [GoalNames.hunting]?: HuntingData
   [GoalNames.localEcon]?: LocalEconData
+  [GoalNames.colonyEcon]?: ColonyEconData
 }
 
 export type GoalState = {

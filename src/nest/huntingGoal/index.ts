@@ -1,9 +1,8 @@
 import { Egg, Spooders } from 'creeps'
 import { Carrier, layCarrierEgg } from 'creeps/carrier'
 import { Hunter, layHunterEgg } from 'creeps/hunter'
-import { nestFind, nestGoalData, nestLevel, nestSpoods } from 'nest/helpers'
+import { nestFind, nestLevel, nestRoom, nestSpoods } from 'nest/helpers'
 import { Goal, GoalNames } from 'nest/types'
-import { HuntingData } from './hooks'
 import { run } from './run'
 
 export const huntingGoal: Goal = {
@@ -19,8 +18,8 @@ export const huntingGoal: Goal = {
 
   eggs: (nest: string) => {
     const eggs: Egg[] = []
-    const { huntingGrounds } =
-      (nestGoalData(nest, GoalNames.hunting) as HuntingData) || {}
+    const { huntingGrounds } = nestRoom(nest).memory
+
     const spoods = nestSpoods(nest)
     const hunters = spoods.filter(
       spood => spood.type === Spooders.hunter,
