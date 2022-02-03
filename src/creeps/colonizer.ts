@@ -1,8 +1,15 @@
 import { LayEgg, Spooders } from 'creeps'
 import { ColonyEconData } from 'nest/colonyEconGoal/hooks'
-import { nestGoalData, nestHuntingGrounds, nestMarker } from 'nest/helpers'
+import {
+  getEmptyAdjecentSquares,
+  nestFind,
+  nestGoalData,
+  nestHuntingGrounds,
+  nestMarker,
+  nestRoom,
+} from 'nest/helpers'
 import { GoalNames } from 'nest/types'
-import { deserializePos } from 'utils/helpers'
+import { deserializePos, serializePos } from 'utils/helpers'
 import { creepForName } from './helpers'
 
 export type Colonizer = CreepMemory & {
@@ -13,22 +20,6 @@ export type Colonizer = CreepMemory & {
   }
 }
 
-const serializeRoute = (route: { exit: ExitConstant; room: string }[]) =>
-  route.map(r => `${r.exit},${r.room}`).join(';')
-const deserializeRoute = (route: string) =>
-  route.split(';').map(r => {
-    const [exit, room] = r.split(',')
-    return { exit: parseInt(exit) as ExitConstant, room }
-  })
-const getRoute = (colonizer: Colonizer) => {
-  if (colonizer.data.route) return deserializeRoute(colonizer.data.route)
-
-  const route = Game.map.findRoute(colonizer.nest, colonizer.data.colony)
-  if (route === ERR_NO_PATH) return null
-  colonizer.data.route = serializeRoute(route)
-  return route
-}
-
 export const layColonizerEgg: LayEgg<Colonizer['data']> = (
   goal,
   data,
@@ -37,8 +28,8 @@ export const layColonizerEgg: LayEgg<Colonizer['data']> = (
   type: Spooders.colonizer,
   body: {
     parts: {
-      [MOVE]: 10,
-      [CLAIM]: 5,
+      [MOVE]: 2,
+      [CLAIM]: 2,
     },
     grow: false,
   },
@@ -67,11 +58,8 @@ export const colonizer = (colonizer: Colonizer) => {
       creep.moveTo(creep.room.controller)
     }
   } else {
-    const route = getRoute(colonizer) || []
-    const currentStep = route.find(r => r.room === creep.room.name)
-    if (!currentStep) return
-    const exit = creep.room.find(currentStep.exit)
-    creep.moveTo(exit[0])
+    const position = new RoomPosition(20, 20, colony)
+    creep.moveTo(position)
   }
 }
 
@@ -80,7 +68,9 @@ const buildColonyInfra = (nest: string, colony: string) => {
 
   const storagePos = deserializePos(nestMarker(nest, 'storage'))
 
-  const hg = nestHuntingGrounds(colony) || []
+  const hg = nestHuntingGrounds(colony) || createHuntingGrounds(colony)
+
+  if (!hg) return
 
   const hgPos = hg.map(deserializePos)
   const roads = hgPos
@@ -93,7 +83,29 @@ const buildColonyInfra = (nest: string, colony: string) => {
   hgPos.map(pos => pos.createConstructionSite(STRUCTURE_CONTAINER))
   roads.map(pos => pos.createConstructionSite(STRUCTURE_ROAD))
 
+  console.log(hgPos.map(serializePos))
+  console.log(roads.map(serializePos))
+
   data.initColonyStructures[colony] = true
   data.pendingColony = null
   data.activeColonies.push(colony)
+}
+
+const createHuntingGrounds = (room: string) => {
+  const roomMemory = nestRoom(room).memory
+
+  if (roomMemory.huntingGrounds) return
+
+  const sources = nestFind(room, FIND_SOURCES)
+
+  const huntingGrounds = sources.map(source => {
+    const sortedSpaces = getEmptyAdjecentSquares(source.pos)
+      .map(pos => ({ pos } as RoomObject))
+      .map(pObj => pObj.pos)
+
+    return sortedSpaces[0]
+  })
+
+  roomMemory.huntingGrounds = huntingGrounds.map(serializePos)
+  return roomMemory.huntingGrounds
 }

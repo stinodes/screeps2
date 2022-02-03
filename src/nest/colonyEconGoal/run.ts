@@ -1,5 +1,6 @@
 import { Spooders } from 'creeps'
 import { carrier } from 'creeps/carrier'
+import { Colonizer, colonizer } from 'creeps/colonizer'
 import { ColonyCarrier, ColonyCarrierTask } from 'creeps/colonyCarrier'
 import { ColonyHunter } from 'creeps/colonyHunter'
 import { ColonyWorker, ColonyWorkerTask } from 'creeps/colonyWorker'
@@ -41,27 +42,30 @@ const createWorkerTask = (worker: ColonyWorker) => {
     },
   ])
 
-  let task: null | ColonyWorkerTask = null
+  try {
+    let task: null | ColonyWorkerTask = null
+    switch (phase) {
+      case 'use':
+        task = taskForPriority<ColonyWorkerTask>([
+          repairBuildingTask(worker, colony),
+          weaveTask(worker, colony),
+        ])
+        break
+      case 'gather':
+      default:
+        task = taskForPriority<ColonyWorkerTask>([
+          lootTombstoneTask(worker, colony),
+          pickUpResourceTask(worker, colony),
+          withdrawHuntingContainerTask(worker, colony),
+          harvestFreeSourceTask(worker, colony),
+        ])
+        break
+    }
 
-  switch (phase) {
-    case 'use':
-      task = taskForPriority<ColonyWorkerTask>([
-        repairBuildingTask(worker, colony),
-        weaveTask(worker, colony),
-      ])
-      break
-    case 'gather':
-    default:
-      task = taskForPriority<ColonyWorkerTask>([
-        lootTombstoneTask(worker, colony),
-        pickUpResourceTask(worker, colony),
-        withdrawHuntingContainerTask(worker, colony),
-        harvestFreeSourceTask(worker, colony),
-      ])
-      break
+    if (task) worker.task = task
+  } catch (e) {
+    console.log(e)
   }
-
-  if (task) worker.task = task
 }
 
 const createCarrierTask = (carrier: ColonyCarrier) => {
@@ -81,37 +85,42 @@ const createCarrierTask = (carrier: ColonyCarrier) => {
     },
   ])
 
-  let task
-  switch (phase) {
-    case 'deposit':
-      task = taskForPriority<ColonyCarrierTask>([
-        storeExtensionsTask(carrier),
-        storeStorageTask(carrier),
-        dropStoragePosTask(carrier),
-      ])
-      break
+  try {
+    let task
+    switch (phase) {
+      case 'deposit':
+        task = taskForPriority<ColonyCarrierTask>([
+          storeStorageTask(carrier),
+          dropStoragePosTask(carrier),
+        ])
+        break
 
-    case 'fill':
-    default:
-      task = taskForPriority<ColonyCarrierTask>([
-        pickUpHuntingGroundResourceTask(carrier, colony),
-        withdrawHuntingGroundTask(carrier, colony),
-      ])
-      break
+      case 'fill':
+      default:
+        task = taskForPriority<ColonyCarrierTask>([
+          pickUpHuntingGroundResourceTask(carrier, colony),
+          withdrawHuntingGroundTask(carrier, colony),
+        ])
+        break
+    }
+    if (task) carrier.task = task
+  } catch (e) {
+    console.log(e)
   }
-  if (task) carrier.task = task
 }
 
 export const run = (nest: string) => {
   hooks(nest)
 
-  const spoods = nestGoalSpoods<ColonyHunter | ColonyCarrier | ColonyWorker>(
-    nest,
-    GoalNames.colonyEcon,
-  )
+  const spoods = nestGoalSpoods<
+    Colonizer | ColonyHunter | ColonyCarrier | ColonyWorker
+  >(nest, GoalNames.colonyEcon)
 
   const spoodsWithCompleteTask = spoods.filter(
-    s => s.type !== Spooders.colonyHunter && (!s.task || s.task.complete),
+    s =>
+      s.type !== Spooders.colonyHunter &&
+      s.type !== Spooders.colonizer &&
+      (!s.task || s.task.complete),
   )
   spoodsWithCompleteTask.forEach(s => {
     switch (s.type) {
@@ -119,12 +128,16 @@ export const run = (nest: string) => {
         createWorkerTask(s)
         break
       case Spooders.colonyCarrier:
+        createCarrierTask(s)
         break
     }
   })
 
   spoods.forEach(s => {
     switch (s.type) {
+      case Spooders.colonizer:
+        colonizer(s)
+        break
       case Spooders.colonyWorker:
         worker(s)
         break
