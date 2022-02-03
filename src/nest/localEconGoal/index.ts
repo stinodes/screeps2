@@ -1,14 +1,14 @@
-import { layWorkerEgg, Worker } from 'creeps/worker'
-import { nestFind, nestGoalData, nestGoalSpoods, nestLevel } from '../helpers'
-import { GoalNames, Goal } from '../types'
-import { LocalEconData } from './hooks'
-import { run } from './run'
+import {layWorkerEgg, Worker} from 'creeps/worker'
+import {nestFind, nestGoalData, nestGoalSpoods, nestLevel} from '../helpers'
+import {GoalNames, Goal} from '../types'
+import {LocalEconData} from './hooks'
+import {run} from './run'
 
 export const localEconGoal: Goal = {
   name: GoalNames.localEcon,
   canCreate: nest => {
     const extensions = nestFind(nest, FIND_STRUCTURES, {
-      filter: { structureType: STRUCTURE_EXTENSION },
+      filter: {structureType: STRUCTURE_EXTENSION},
     })
     return nestLevel(nest) >= 2 && extensions.length >= 5
   },
@@ -35,12 +35,12 @@ export const localEconGoal: Goal = {
 
     const eggs = []
 
-    if (data.status === 'unhealthy' && spoods.length < 2) {
+    if (['unhealthy', 'recovering'].includes(data.status as string) && spoods.length < 2) {
       const egg = layWorkerEgg(GoalNames.localEcon, {}, 0)
       egg.body.grow = false
       eggs.push(egg)
     } else if (upgraders.length < nUpgraders)
-      eggs.push(layWorkerEgg(GoalNames.localEcon, { upgrader: true }, 2))
+      eggs.push(layWorkerEgg(GoalNames.localEcon, {upgrader: true}, 2))
     else if (spoods.length < requiredSpooders)
       eggs.push(layWorkerEgg(GoalNames.localEcon, {}, 2))
 

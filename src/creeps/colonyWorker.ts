@@ -1,5 +1,5 @@
-import { LayEgg, Spooders } from 'creeps'
-import { Task, TaskNames } from './tasks'
+import {LayEgg, Spooders} from 'creeps'
+import {Task, TaskNames} from './tasks'
 
 export type ColonyWorkerTask =
   | Task<TaskNames.harvest, Source>
@@ -23,7 +23,7 @@ export type ColonyWorker = CreepMemory & {
 export const layColonyWorkerEgg: LayEgg<ColonyWorker['data']> = (
   goal,
   data,
-  priority = 2,
+  priority = 3,
 ) => ({
   type: Spooders.colonyWorker,
   body: {
@@ -32,6 +32,7 @@ export const layColonyWorkerEgg: LayEgg<ColonyWorker['data']> = (
       [CARRY]: 1,
       [MOVE]: 1,
     },
+    max: BODYPART_COST[WORK] * 4 + BODYPART_COST[CARRY] * 4 + BODYPART_COST[MOVE] * 4,
     grow: true,
   },
   goal,

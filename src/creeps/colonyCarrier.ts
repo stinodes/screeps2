@@ -1,6 +1,6 @@
-import { LayEgg, Spooders } from 'creeps'
-import { SerializedPosition } from 'utils/helpers'
-import { Task, TaskNames } from './tasks'
+import {LayEgg, Spooders} from 'creeps'
+import {SerializedPosition} from 'utils/helpers'
+import {Task, TaskNames} from './tasks'
 
 export type ColonyCarrierTask =
   | Task<TaskNames.store, AnyStoreStructure>
@@ -21,14 +21,15 @@ export type ColonyCarrier = CreepMemory & {
 export const layColonyCarrierEgg: LayEgg<ColonyCarrier['data']> = (
   goal,
   data,
-  priority = 1,
+  priority = 3,
 ) => ({
   type: Spooders.colonyCarrier,
   body: {
     parts: {
-      [CARRY]: 7,
-      [MOVE]: 4,
+      [CARRY]: 1,
+      [MOVE]: 1,
     },
+    max: BODYPART_COST[CARRY] * 14 + BODYPART_COST[MOVE] * 14,
     grow: true,
   },
   goal,

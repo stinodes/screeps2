@@ -1,11 +1,11 @@
-import { Spooders } from 'creeps'
-import { isCreepEmpty, isCreepFull } from 'creeps/helpers'
-import { TaskNames } from 'creeps/tasks'
-import { creepPhase, taskForPriority } from 'creeps/tasks/taskPriority'
-import { Worker, worker, WorkerTask } from 'creeps/worker'
-import { nestGoalData, nestGoalSpoods } from 'nest/helpers'
-import { Goal, GoalNames } from 'nest/types'
-import { hooks, LocalEconData } from './hooks'
+import {Spooders} from 'creeps'
+import {isCreepEmpty, isCreepFull} from 'creeps/helpers'
+import {TaskNames} from 'creeps/tasks'
+import {creepPhase, taskForPriority} from 'creeps/tasks/taskPriority'
+import {Worker, worker, WorkerTask} from 'creeps/worker'
+import {nestGoalData, nestGoalSpoods} from 'nest/helpers'
+import {Goal, GoalNames} from 'nest/types'
+import {hooks, LocalEconData} from './hooks'
 import {
   harvestFreeSourceTask,
   lootTombstoneTask,
@@ -47,6 +47,7 @@ const createWorkerEmergencyTask = (worker: Worker) => {
     default:
       task = taskForPriority<WorkerTask>([
         pickUpResourceTask(worker),
+        lootTombstoneTask(worker),
         harvestFreeSourceTask(worker),
       ])
       break
@@ -73,7 +74,7 @@ const createWorkerTask = (worker: Worker) => {
   switch (phase) {
     case 'use':
       if (worker.data?.upgrader)
-        task = { name: TaskNames.upgrade, target: null }
+        task = {name: TaskNames.upgrade, target: null}
       else
         task = taskForPriority<WorkerTask>([
           storeExtensionsTask(worker),
@@ -111,7 +112,7 @@ export const run: Goal['run'] = (nest: string) => {
   )
 
   workersWithCompleteTask.forEach(s => {
-    if (data.status === 'unhealthy') createWorkerEmergencyTask(s)
+    if (['unhealthy', 'recovering'].includes(data.status as string)) createWorkerEmergencyTask(s)
     else createWorkerTask(s)
   })
 

@@ -12,9 +12,10 @@ import { GoalNames } from 'nest/types'
 import { deserializePos } from 'utils/helpers'
 
 export type ColonyEconData = {
-  colonyCandidates?: string[]
-  activeColonies?: string[]
-  initColonyStructures?: { [colony: string]: boolean }
+  colonyCandidates: string[]
+  pendingColony: null | string
+  activeColonies: string[]
+  initColonyStructures: { [colony: string]: boolean }
 }
 
 global.addColonyCandidate = (nest: string, candidate: string) => {
@@ -31,48 +32,20 @@ global.addColonyCandidate = (nest: string, candidate: string) => {
 
 export const hooks = (nest: string) => {
   const data = nestGoalData(nest, GoalNames.colonyEcon) as ColonyEconData
-  // findColonyCandidates(nest)
-  if (!data.colonyCandidates) data.colonyCandidates = []
-  if (!data.activeColonies) data.activeColonies = []
 
-  // if (data.colonyCandidates && data.colonyCandidates.length)
-  //   setActiveColonies(nest)
-}
-
-const findColonyCandidates = (nest: string) => {
-  const data = nestGoalData(nest, GoalNames.colonyEcon) as ColonyEconData
-
-  if (data.colonyCandidates) return
-
-  const adjecentRooms = Object.values(Game.map.describeExits(nest)).map(
-    str => Game.rooms[str],
-  )
-
-  const possibleColonyNames = adjecentRooms
-    .filter(
-      room =>
-        room.find(FIND_SOURCES).length &&
-        (!room.controller || !room.controller.owner),
-    )
-    .sort(
-      (roomA, roomB) =>
-        roomA.find(FIND_SOURCES).length - roomB.find(FIND_SOURCES).length,
-    )
-    .map(room => room.name)
-
-  data.colonyCandidates = possibleColonyNames
-}
-
-const setActiveColonies = (nest: string) => {
-  const data = nestGoalData(nest, GoalNames.colonyEcon) as ColonyEconData
+  const reevaluateTick = Game.time % 50 === 0
 
   if (
-    Game.time % 50 !== 0 ||
-    !data.colonyCandidates ||
-    !data.activeColonies ||
-    data.colonyCandidates.length === data.activeColonies.length
+    reevaluateTick &&
+    !data.pendingColony &&
+    data.colonyCandidates.length &&
+    data.colonyCandidates.length > data.activeColonies.length
   )
-    return
+    kickOffColony(nest)
+}
+
+const kickOffColony = (nest: string) => {
+  const data = nestGoalData(nest, GoalNames.colonyEcon) as ColonyEconData
 
   const allSpiders = nestGoalSpoods<
     ColonyHunter | ColonyWorker | ColonyCarrier
@@ -105,27 +78,6 @@ const setActiveColonies = (nest: string) => {
   )
 
   if (nextColonyCandidate) {
-    createColony(nest, nextColonyCandidate)
+    data.pendingColony = nextColonyCandidate
   }
-}
-
-const createColony = (nest: string, colony: string) => {
-  console.log('ADDING COLONY: ', colony)
-  const data = nestGoalData(nest, GoalNames.colonyEcon) as ColonyEconData
-  const storagePos = deserializePos(nestMarker(nest, 'storage'))
-
-  const hg = nestHuntingGrounds(colony) || []
-
-  const hgPos = hg.map(deserializePos)
-  const roads = hgPos
-    .reduce((prev, hg) => {
-      const { path } = PathFinder.search(storagePos, hg)
-      return prev.concat(path)
-    }, [] as RoomPosition[])
-    .filter(pos => pos.roomName !== nest)
-
-  data.activeColonies?.push(colony)
-
-  hgPos.map(pos => pos.createConstructionSite(STRUCTURE_CONTAINER))
-  roads.map(pos => pos.createConstructionSite(STRUCTURE_ROAD))
 }

@@ -1,5 +1,5 @@
-import { GoalNames } from 'nest/types'
-import { Body } from './body'
+import {GoalNames} from 'nest/types'
+import {Body} from './body'
 
 export enum Spooders {
   spiderling = 'spiderling',
@@ -8,6 +8,7 @@ export enum Spooders {
   carrier = 'carrier',
   worker = 'worker',
 
+  colonizer = 'colonizer',
   colonyWorker = 'colony-worker',
   colonyHunter = 'colony-hunter',
   colonyCarrier = 'colony-carrier',

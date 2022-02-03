@@ -181,7 +181,9 @@ export const pickUpResourceTask: TaskPriorityCreator<
   name: TaskNames.pickUp,
   getTarget: () =>
     creepForName(creep.name).pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
-      filter: resource => resource.amount > PICKUP_THRESHOLD,
+      filter: resource =>
+        resource.amount >=
+        creepForName(creep.name).body.filter(b => b.type === CARRY).length * 50,
     })?.id,
 })
 

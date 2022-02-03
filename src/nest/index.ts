@@ -30,7 +30,12 @@ export const createNest = (roomName: string): Nest => {
     [GoalNames.startUp]: {},
     [GoalNames.hunting]: {},
     [GoalNames.localEcon]: {},
-    [GoalNames.colonyEcon]: {},
+    [GoalNames.colonyEcon]: {
+      colonyCandidates: [],
+      pendingColony: null,
+      activeColonies: [],
+      initColonyStructures: {},
+    },
 
     markers,
   }

@@ -1,5 +1,5 @@
-import { LayEgg, Spooders } from 'creeps'
-import { SerializedPosition } from 'utils/helpers'
+import {LayEgg, Spooders} from 'creeps'
+import {SerializedPosition} from 'utils/helpers'
 
 export type ColonyHunter = CreepMemory & {
   type: Spooders.colonyHunter
@@ -14,13 +14,13 @@ export type ColonyHunter = CreepMemory & {
 export const layColonyHunterEgg: LayEgg<ColonyHunter['data']> = (
   goal,
   data,
-  priority = 1,
+  priority = 3,
 ) => ({
   type: Spooders.colonyHunter,
   body: {
     parts: {
       [WORK]: 5,
-      [MOVE]: 1,
+      [MOVE]: 5,
     },
     grow: false,
   },

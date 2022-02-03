@@ -1,6 +1,6 @@
-import { LayEgg, Spooders } from 'creeps'
-import { ColonyWorker } from './colonyWorker'
-import { creepForName } from './helpers'
+import {LayEgg, Spooders} from 'creeps'
+import {ColonyWorker} from './colonyWorker'
+import {creepForName} from './helpers'
 import {
   harvest,
   pickUp,
@@ -46,6 +46,7 @@ export const layWorkerEgg: LayEgg<Worker['data']> = (
       [CARRY]: 1,
       [MOVE]: 1,
     },
+    max: BODYPART_COST[WORK] * 8 + BODYPART_COST[CARRY] * 8 + BODYPART_COST[MOVE] * 8,
     grow: true,
   },
   goal,
@@ -54,7 +55,7 @@ export const layWorkerEgg: LayEgg<Worker['data']> = (
   priority,
 })
 
-export const worker = ({ name, task }: ColonyWorker | Worker) => {
+export const worker = ({name, task}: ColonyWorker | Worker) => {
   const creep = creepForName(name)
 
   switch (task?.name) {
@@ -73,7 +74,7 @@ export const worker = ({ name, task }: ColonyWorker | Worker) => {
     case TaskNames.upgrade:
       return upgrade(creep, task)
     default:
-      ;(task as Task<any, any>).complete = true
+      ; (task as Task<any, any>).complete = true
       return task
   }
 }

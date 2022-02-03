@@ -27,9 +27,10 @@ export const layCarrierEgg: LayEgg<Carrier['data']> = (
   type: Spooders.carrier,
   body: {
     parts: {
-      [CARRY]: 7,
-      [MOVE]: 4,
+      [CARRY]: 2,
+      [MOVE]: 1,
     },
+    max: BODYPART_COST[CARRY] * 16 + BODYPART_COST[MOVE] * 8,
     grow: true,
   },
   goal,

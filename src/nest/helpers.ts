@@ -6,7 +6,6 @@ import { GoalNames } from './types'
 export const nestMem = (nest: string) => Memory.nests[nest]
 
 export const nestGoalData = (nest: string, goal: GoalNames) => {
-  if (!Memory.nests[nest][goal]) Memory.nests[nest][goal] = {}
   return Memory.nests[nest][goal]
 }
 
