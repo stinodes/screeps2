@@ -1,5 +1,5 @@
-import {LayEgg, Spooders} from 'creeps'
-import {SerializedPosition} from 'utils/helpers'
+import { LayEgg, Spooders } from 'creeps'
+import { SerializedPosition } from 'utils/helpers'
 
 export type ColonyHunter = CreepMemory & {
   type: Spooders.colonyHunter

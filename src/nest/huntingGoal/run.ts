@@ -7,6 +7,7 @@ import {
   pickUpHuntingGroundResourceTask,
   storeExtensionsTask,
   storeStorageTask,
+  withdrawFromLinkTask,
   withdrawHuntingGroundTask,
 } from 'creeps/tasks/taskCreators'
 import { creepPhase, taskForPriority } from 'creeps/tasks/taskPriority'
@@ -40,6 +41,7 @@ const createCarrierTask = (carrier: Carrier) => {
     case 'fill':
     default:
       task = taskForPriority<CarrierTask>([
+        withdrawFromLinkTask(carrier),
         pickUpHuntingGroundResourceTask(carrier),
         withdrawHuntingGroundTask(carrier),
       ])

@@ -8,6 +8,8 @@ export enum Spooders {
   carrier = 'carrier',
   worker = 'worker',
 
+  defender = 'defender',
+
   colonizer = 'colonizer',
   colonyWorker = 'colony-worker',
   colonyHunter = 'colony-hunter',

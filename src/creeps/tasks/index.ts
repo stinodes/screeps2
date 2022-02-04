@@ -1,4 +1,5 @@
 import { config } from 'config'
+import { nestMarker } from 'nest/helpers'
 import { deserializePos } from 'utils/helpers'
 import {
   creepBuild,
@@ -20,6 +21,7 @@ export enum TaskNames {
   upgrade = 'upgrade',
   weave = 'weave',
   repair = 'repair',
+  moveToRoom = 'moveToRoom',
 }
 
 export type Task<Name extends TaskNames, TargetId, Target = Id<TargetId>> = {
@@ -159,4 +161,26 @@ export const withdraw = (
     task.complete = true
   }
   return task
+}
+
+export const moveToRoom = (
+  creep: Creep,
+  task: Task<TaskNames.moveToRoom, null, string>,
+) => {
+  const exitPos = [0, 49]
+  if (
+    creep.room.name !== task.target ||
+    exitPos.includes(creep.pos.x) ||
+    exitPos.includes(creep.pos.y)
+  ) {
+    const stMarker = nestMarker(task.target, 'storage')
+    creep.moveTo(
+      stMarker
+        ? deserializePos(stMarker)
+        : new RoomPosition(20, 20, task.target),
+    )
+    task.progress = true
+  } else {
+    task.complete = true
+  }
 }

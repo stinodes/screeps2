@@ -10,6 +10,9 @@ export const isCreepFull = (
   type: ResourceConstant = RESOURCE_ENERGY,
 ) => creepForName(name).store.getFreeCapacity(type) === 0
 
+export const creepCapacity = (name: string) =>
+  creepForName(name).body.filter(b => b.type === CARRY).length * 50
+
 export const creepHarvest = (creep: Creep, source: Source) => {
   if (!source) return
   creep.say('🪰')

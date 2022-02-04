@@ -6,6 +6,7 @@ import {
   nestFind,
   nestHuntingGrounds,
   nestMarker,
+  nestStorage,
   oneOfStructures,
   relativePos,
   sortByRange,
@@ -25,6 +26,38 @@ type TaskPriorityCreator<
 /**
  *    STORING
  */
+export const colonyCarrierStoreTask: TaskPriorityCreator<
+  | Task<TaskNames.store, AnyStoreStructure>
+  | Task<TaskNames.moveToRoom, null, string>
+> = (creep, targetRoom = creep.nest) => {
+  return {
+    name: TaskNames.store,
+    getTarget: () => {
+      const c = creepForName(creep.name)
+
+      const closestStore = c.pos.findClosestByPath(FIND_STRUCTURES, {
+        filter: str =>
+          oneOfStructures(str, [STRUCTURE_STORAGE, STRUCTURE_LINK]),
+      }) as void | AnyStoreStructure
+
+      const storage = nestStorage(targetRoom)
+
+      if (!closestStore || !storage) return null
+
+      if (
+        closestStore.id === storage.id ||
+        closestStore.store.getFreeCapacity(RESOURCE_ENERGY) < 0
+        // creepCapacity(creep.name)
+      )
+        return storage.id
+
+      if (closestStore.pos.getRangeTo(storage.pos) > 5) return closestStore.id
+
+      return storage.id
+    },
+  }
+}
+
 export const storeExtensionsTask: TaskPriorityCreator<
   Task<TaskNames.store, AnyStoreStructure>
 > = (creep, targetRoom = creep.nest) => {
@@ -79,12 +112,7 @@ export const storeStorageTask: TaskPriorityCreator<
 > = (creep: CreepMemory, targetRoom: string = creep.nest) => {
   return {
     name: TaskNames.store,
-    getTarget: () =>
-      (
-        nestFind(targetRoom, FIND_STRUCTURES, {
-          filter: { structureType: STRUCTURE_STORAGE },
-        }) as AnyStoreStructure[]
-      )[0]?.id,
+    getTarget: () => nestStorage(targetRoom)?.id,
   }
 }
 
@@ -151,15 +179,26 @@ export const pickUpFromStorageTask: TaskPriorityCreator<
     ).lookFor(LOOK_RESOURCES)[0]?.id,
 })
 
+export const withdrawFromLinkTask: TaskPriorityCreator<
+  Task<TaskNames.withdraw, AnyStoreStructure>
+> = (creep, targetRoom = creep.nest) => ({
+  name: TaskNames.withdraw,
+  getTarget: () => {
+    const link = nestStorage(targetRoom)?.pos.findClosestByPath(
+      FIND_STRUCTURES,
+      {
+        filter: { structureType: STRUCTURE_LINK },
+      },
+    ) as StructureLink
+    if (link.store.getUsedCapacity(RESOURCE_ENERGY) > 0) return link.id
+    return
+  },
+})
 export const withdrawFromStorageTask: TaskPriorityCreator<
   Task<TaskNames.withdraw, AnyStoreStructure>
 > = (creep, targetRoom = creep.nest) => ({
   name: TaskNames.withdraw,
-  getTarget: () =>
-    deserializePos(nestMarker(targetRoom, 'storage'))
-      .lookFor(LOOK_STRUCTURES)
-      .filter(struct => oneOfStructures(struct as any, [STRUCTURE_STORAGE]))[0]
-      ?.id as Id<AnyStoreStructure>,
+  getTarget: () => nestStorage(targetRoom)?.id,
 })
 
 export const lootTombstoneTask: TaskPriorityCreator<
@@ -235,6 +274,7 @@ export const pickUpHuntingGroundResourceTask: TaskPriorityCreator<
     creep.data &&
     deserializePos(creep.data.huntingGround)
       .lookFor(LOOK_RESOURCES)
+      .filter(r => r.amount > 100)
       .sort((a, b) => a.amount - b.amount)[0]?.id,
 })
 
@@ -249,4 +289,15 @@ export const withdrawHuntingGroundTask: TaskPriorityCreator<
       .lookFor(LOOK_STRUCTURES)
       .filter(structure => structure.structureType === STRUCTURE_CONTAINER)[0]
       ?.id as Id<AnyStoreStructure>),
+})
+
+/**
+ * MISC
+ */
+export const moveToRoomTask: TaskPriorityCreator<
+  Task<TaskNames.moveToRoom, null, string>
+> = (creep, targetRoom = creep.nest) => ({
+  name: TaskNames.moveToRoom,
+  getTarget: () =>
+    creepForName(creep.name).room.name === targetRoom ? null : targetRoom,
 })

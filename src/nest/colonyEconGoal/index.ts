@@ -1,17 +1,19 @@
-import {Egg, Spooders} from 'creeps'
-import {Colonizer, layColonizerEgg} from 'creeps/colonizer'
-import {ColonyCarrier, layColonyCarrierEgg} from 'creeps/colonyCarrier'
-import {ColonyHunter, layColonyHunterEgg} from 'creeps/colonyHunter'
-import {ColonyWorker, layColonyWorkerEgg} from 'creeps/colonyWorker'
+import { Egg, Spooders } from 'creeps'
+import { Colonizer, layColonizerEgg } from 'creeps/colonizer'
+import { ColonyCarrier, layColonyCarrierEgg } from 'creeps/colonyCarrier'
+import { ColonyHunter, layColonyHunterEgg } from 'creeps/colonyHunter'
+import { ColonyWorker, layColonyWorkerEgg } from 'creeps/colonyWorker'
+import { Defender, layDefenderEgg } from 'creeps/defender'
 import {
+  nestFind,
   nestGoalData,
   nestGoalSpoods,
   nestHuntingGrounds,
   nestLevel,
 } from 'nest/helpers'
-import {Goal, GoalNames} from 'nest/types'
-import {ColonyEconData} from './hooks'
-import {run} from './run'
+import { Goal, GoalNames } from 'nest/types'
+import { ColonyEconData } from './hooks'
+import { run } from './run'
 
 export const colonyEconGoal: Goal = {
   name: GoalNames.colonyEcon,
@@ -27,13 +29,17 @@ export const colonyEconGoal: Goal = {
     const eggs: Egg[] = []
 
     const allSpiders = nestGoalSpoods<
-      Colonizer | ColonyHunter | ColonyWorker | ColonyCarrier
+      Defender | Colonizer | ColonyHunter | ColonyWorker | ColonyCarrier
     >(nest, GoalNames.colonyEcon)
 
     if (pendingColony) {
-      const hasColonizer = allSpiders.some(s => s.type === Spooders.colonizer && s.data?.colony === pendingColony)
+      const hasColonizer = allSpiders.some(
+        s => s.type === Spooders.colonizer && s.data?.colony === pendingColony,
+      )
       if (!hasColonizer)
-        eggs.push(layColonizerEgg(GoalNames.colonyEcon, {colony: pendingColony}))
+        eggs.push(
+          layColonizerEgg(GoalNames.colonyEcon, { colony: pendingColony }),
+        )
     }
 
     colonies?.forEach(colony => {
@@ -41,10 +47,24 @@ export const colonyEconGoal: Goal = {
 
       const huntingGrounds = nestHuntingGrounds(colony) || []
 
+      const colonyUnderAttack = Game.rooms[colony]
+        ? nestFind(colony, FIND_HOSTILE_CREEPS).length > 0
+        : false
+
+      if (
+        colonyUnderAttack &&
+        !allSpiders.some(
+          s => s.type === Spooders.defender && s.data?.room === colony,
+        )
+      )
+        eggs.push(
+          layDefenderEgg(GoalNames.colonyEcon, { room: colony, colony }),
+        )
+
       if (!colonySpiders.some(s => s.type === Spooders.colonizer))
-        eggs.push(layColonizerEgg(GoalNames.colonyEcon, {colony}))
+        eggs.push(layColonizerEgg(GoalNames.colonyEcon, { colony }))
       if (!colonySpiders.some(s => s.type === Spooders.colonyWorker))
-        eggs.push(layColonyWorkerEgg(GoalNames.colonyEcon, {colony}))
+        eggs.push(layColonyWorkerEgg(GoalNames.colonyEcon, { colony }))
 
       huntingGrounds.forEach(g => {
         if (
