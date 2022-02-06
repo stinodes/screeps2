@@ -36,6 +36,9 @@ export const createNest = (roomName: string): Nest => {
       activeColonies: [],
       initColonyStructures: {},
     },
+    [GoalNames.settle]: {
+      target: null,
+    },
 
     markers,
   }

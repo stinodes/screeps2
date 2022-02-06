@@ -18,7 +18,7 @@ export const localEconGoal: Goal = {
     const spoods = nestGoalSpoods(nest, GoalNames.localEcon) as Worker[]
 
     const upgraders = spoods.filter(s => s.data?.upgrader)
-    const nUpgraders = 1
+    const nUpgraders = 2
     const minWorkers = 1
     const maxWorkers = 1
 
