@@ -1,5 +1,11 @@
 import { layWorkerEgg, Worker } from 'creeps/worker'
-import { nestFind, nestGoalData, nestGoalSpoods, nestLevel } from '../helpers'
+import {
+  nestFind,
+  nestGoalData,
+  nestGoalSpoods,
+  nestLevel,
+  nestMem,
+} from '../helpers'
 import { GoalNames, Goal } from '../types'
 import { LocalEconData } from './hooks'
 import { run } from './run'
@@ -14,7 +20,7 @@ export const localEconGoal: Goal = {
   },
   isComplete: () => false,
   eggs: nest => {
-    const data = nestGoalData(nest, GoalNames.localEcon) as LocalEconData
+    const nestMemory = nestMem(nest)
     const spoods = nestGoalSpoods(nest, GoalNames.localEcon) as Worker[]
 
     const upgraders = spoods.filter(s => s.data?.upgrader)
@@ -36,7 +42,7 @@ export const localEconGoal: Goal = {
     const eggs = []
 
     if (
-      ['unhealthy', 'recovering'].includes(data.status as string) &&
+      ['unhealthy', 'recovering'].includes(nestMemory.status as string) &&
       spoods.length < 2
     ) {
       const egg = layWorkerEgg(GoalNames.localEcon, {}, 0)

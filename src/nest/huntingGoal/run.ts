@@ -1,5 +1,6 @@
 import { Spooders } from 'creeps'
-import { carrier, Carrier, CarrierTask } from 'creeps/carrier'
+import { baseSpider } from 'creeps/baseBehavior'
+import { Carrier, CarrierTask } from 'creeps/carrier'
 import { isCreepEmpty, isCreepFull } from 'creeps/helpers'
 import { Hunter, hunter } from 'creeps/hunter'
 import {
@@ -68,7 +69,7 @@ export const run: Goal['run'] = nest => {
         hunter(s as Hunter)
         break
       case Spooders.carrier:
-        carrier(s as Carrier)
+        baseSpider(s as Carrier)
         break
     }
   })

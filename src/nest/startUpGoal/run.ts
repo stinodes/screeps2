@@ -1,6 +1,7 @@
 import { Spooders } from 'creeps'
+import { baseSpider } from 'creeps/baseBehavior'
 import { creepForName, isCreepEmpty, isCreepFull } from 'creeps/helpers'
-import { spiderling, Spiderling, SpiderlingTask } from 'creeps/spiderling'
+import { Spiderling, SpiderlingTask } from 'creeps/spiderling'
 import { TaskNames } from 'creeps/tasks'
 import {
   harvestFreeSourceTask,
@@ -66,6 +67,6 @@ export const run: Goal['run'] = (nest: string) => {
   })
 
   spoods.forEach(spood => {
-    if (spood.type === Spooders.spiderling) spiderling(spood as Spiderling)
+    if (spood.type === Spooders.spiderling) baseSpider(spood as Spiderling)
   })
 }

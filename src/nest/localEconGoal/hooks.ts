@@ -1,11 +1,10 @@
-import { Spooders } from 'creeps'
-import { nestGoalData, nestMarker, nestRoom, nestSpoods } from 'nest/helpers'
-import { GoalNames } from 'nest/types'
-import { deserializePos } from 'utils/helpers'
+import {Spooders} from 'creeps'
+import {nestGoalData, nestMarker, nestMem, nestRoom, nestSpoods} from 'nest/helpers'
+import {GoalNames} from 'nest/types'
+import {deserializePos} from 'utils/helpers'
 
 export type LocalEconData = {
   energyPoints?: number[]
-  status?: 'stable' | 'unhealthy' | 'unknown' | 'recovering'
 }
 
 export const hooks = (nest: string) => {
@@ -45,9 +44,9 @@ const logEnergy = (nest: string) => {
 }
 
 const logStatus = (nest: string) => {
-  const data = nestGoalData(nest, GoalNames.localEcon) as LocalEconData
+  const nestMemory = nestMem(nest)
 
-  if (data.status === 'stable' || data.status === 'unknown' || !data.status) {
+  if (nestMemory.status === 'stable' || nestMemory.status === 'unknown' || !nestMemory.status) {
     const spoods = nestSpoods(nest)
 
     /**
@@ -60,7 +59,7 @@ const logStatus = (nest: string) => {
       (spoods.filter(s => s.type === Spooders.hunter).length === 0 ||
         spoods.filter(s => s.type === Spooders.carrier).length === 0)
     )
-      data.status = 'unhealthy'
+      nestMemory.status = 'unhealthy'
 
     return
   } else {
@@ -74,20 +73,21 @@ const logStatus = (nest: string) => {
         [Spooders.spiderling, Spooders.worker].includes(s.type),
       ).length > 1
     )
-      data.status = 'recovering'
+      nestMemory.status = 'recovering'
     if (
       spoods.filter(s => s.type === Spooders.hunter).length > 0 &&
       spoods.filter(s => s.type === Spooders.carrier).length > 0
     )
-      data.status = 'stable'
+      nestMemory.status = 'stable'
 
     return
   }
 }
 
 const log = (nest: string) => {
+  const nestMemory = nestMem(nest)
   const data = nestGoalData(nest, GoalNames.localEcon) as LocalEconData
 
-  console.log('STATUS: ', data.status)
+  console.log('STATUS: ', nestMemory.status)
   console.log('ENERGY LOG: ', data.energyPoints?.join(' | '))
 }

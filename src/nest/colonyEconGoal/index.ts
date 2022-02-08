@@ -49,17 +49,26 @@ export const colonyEconGoal: Goal = {
 
       const colonyUnderAttack = Game.rooms[colony]
         ? nestFind(colony, FIND_HOSTILE_CREEPS).length > 0
-        : false
+        : true
 
       if (
         colonyUnderAttack &&
         !allSpiders.some(
           s => s.type === Spooders.defender && s.data?.room === colony,
         )
-      )
+      ) {
+        const egg = layDefenderEgg(GoalNames.colonyEcon, {
+          room: colony,
+          colony,
+        })
+        egg.body.max =
+          BODYPART_COST[MOVE] * 4 +
+          BODYPART_COST[ATTACK] * 2 +
+          BODYPART_COST[TOUGH] * 2
         eggs.push(
           layDefenderEgg(GoalNames.colonyEcon, { room: colony, colony }),
         )
+      }
 
       if (!colonySpiders.some(s => s.type === Spooders.colonizer))
         eggs.push(layColonizerEgg(GoalNames.colonyEcon, { colony }))

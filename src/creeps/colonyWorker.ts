@@ -1,5 +1,5 @@
-import { LayEgg, Spooders } from 'creeps'
-import { Task, TaskNames } from './tasks'
+import {LayEgg, Spooders} from 'creeps'
+import {Task, TaskNames} from './tasks'
 
 export type ColonyWorkerTask =
   | Task<TaskNames.harvest, Source>
@@ -9,6 +9,7 @@ export type ColonyWorkerTask =
   | Task<TaskNames.store, AnyStoreStructure>
   | Task<TaskNames.weave, ConstructionSite>
   | Task<TaskNames.repair, AnyStructure>
+  | Task<TaskNames.moveToRoom, null, string>
 
 export type ColonyWorker = CreepMemory & {
   type: Spooders.colonyWorker

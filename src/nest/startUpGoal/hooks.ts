@@ -1,5 +1,5 @@
-import { nestFind, nestGoalData, relativePosCurry } from 'nest/helpers'
-import { GoalNames } from 'nest/types'
+import {nestFind, nestGoalData, nestMem, relativePosCurry} from 'nest/helpers'
+import {GoalNames} from 'nest/types'
 
 export type StartUpData = {
   initRoads?: boolean
@@ -8,6 +8,13 @@ export type StartUpData = {
 
 export const hooks = (nest: string) => {
   buildRoads(nest)
+  setStatus(nest)
+}
+
+export const setStatus = (nest: string) => {
+  const nestMemory = nestMem(nest)
+  if (!nestMemory.status)
+    nestMemory.status = 'settling'
 }
 
 const buildRoads = (nest: string) => {

@@ -7,6 +7,7 @@ import {
   nestFind,
   nestGoalData,
   nestGoalSpoods,
+  nestMem,
   nestStorage,
   sortByRange,
 } from 'nest/helpers'
@@ -26,6 +27,7 @@ import {
   withdrawFromStorageTask,
   withdrawHuntingContainerTask,
 } from 'creeps/tasks/taskCreators'
+import { baseSpider } from 'creeps/baseBehavior'
 
 const createWorkerEmergencyTask = (worker: Worker) => {
   const phase = creepPhase(worker, [
@@ -114,7 +116,7 @@ const createWorkerTask = (worker: Worker) => {
 export const run: Goal['run'] = (nest: string) => {
   hooks(nest)
 
-  const data = nestGoalData(nest, GoalNames.localEcon) as LocalEconData
+  const nestMemory = nestMem(nest)
 
   const spoods = nestGoalSpoods(nest, GoalNames.localEcon)
   const workers = spoods.filter(s => s.type === Spooders.worker) as Worker[]
@@ -140,12 +142,12 @@ export const run: Goal['run'] = (nest: string) => {
   })
 
   workersWithCompleteTask.forEach(s => {
-    if (['unhealthy', 'recovering'].includes(data.status as string))
+    if (['unhealthy', 'recovering'].includes(nestMemory.status as string))
       createWorkerEmergencyTask(s)
     else createWorkerTask(s)
   })
 
   spoods.forEach(spood => {
-    if (spood.type === Spooders.worker) worker(spood as Worker)
+    if (spood.type === Spooders.worker) baseSpider(spood as Worker)
   })
 }

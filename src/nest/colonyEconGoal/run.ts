@@ -1,5 +1,5 @@
 import { Spooders } from 'creeps'
-import { carrier } from 'creeps/carrier'
+import { baseSpider } from 'creeps/baseBehavior'
 import { Colonizer, colonizer } from 'creeps/colonizer'
 import { ColonyCarrier, ColonyCarrierTask } from 'creeps/colonyCarrier'
 import { ColonyHunter } from 'creeps/colonyHunter'
@@ -17,16 +17,13 @@ import {
   pickUpResourceTask,
   repairBuildingTask,
   storeExtensionsTask,
-  storeStorageTask,
   storeTowersTask,
-  upgradeControllerTask,
   weaveTask,
   withdrawFromStorageTask,
   withdrawHuntingContainerTask,
   withdrawHuntingGroundTask,
 } from 'creeps/tasks/taskCreators'
 import { creepPhase, taskForPriority } from 'creeps/tasks/taskPriority'
-import { worker } from 'creeps/worker'
 import { nestGoalSpoods } from 'nest/helpers'
 import { GoalNames } from 'nest/types'
 import { hooks } from './hooks'
@@ -70,24 +67,7 @@ const createWorkerTask = (worker: ColonyWorker) => {
     }
   } else {
     console.log('Colony unavailable')
-    switch (phase) {
-      case 'use':
-        task = taskForPriority<ColonyWorkerTask>([
-          storeExtensionsTask(worker),
-          storeTowersTask(worker),
-          weaveTask(worker),
-          upgradeControllerTask(worker),
-        ])
-        break
-      case 'gather':
-      default:
-        task = taskForPriority<ColonyWorkerTask>([
-          lootTombstoneTask(worker, colony),
-          pickUpResourceTask(worker, colony),
-          withdrawFromStorageTask(worker, colony),
-        ])
-        break
-    }
+    task = taskForPriority<ColonyWorkerTask>([moveToRoomTask(worker, colony)])
   }
 
   if (task) worker.task = task
@@ -135,17 +115,16 @@ const createCarrierTask = (carrier: ColonyCarrier) => {
     switch (phase) {
       case 'deposit':
         task = taskForPriority<ColonyCarrierTask>([
-          storeExtensionsTask(carrier),
-          storeTowersTask(carrier),
+          moveToRoomTask(carrier),
+          colonyCarrierStoreTask(carrier),
+          dropStoragePosTask(carrier),
         ])
         break
 
       case 'fill':
       default:
         task = taskForPriority<ColonyCarrierTask>([
-          lootTombstoneTask(carrier),
-          pickUpResourceTask(carrier),
-          withdrawFromStorageTask(carrier),
+          moveToRoomTask(carrier, colony),
         ])
         break
     }
@@ -187,13 +166,13 @@ export const run = (nest: string) => {
         colonizer(s)
         break
       case Spooders.colonyWorker:
-        worker(s)
+        baseSpider(s)
         break
       case Spooders.colonyHunter:
         hunter(s)
         break
       case Spooders.colonyCarrier:
-        carrier(s)
+        baseSpider(s)
         break
     }
   })

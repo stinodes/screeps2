@@ -1,9 +1,9 @@
-import { Egg } from 'creeps'
-import { ColonyEconData } from './colonyEconGoal/hooks'
-import { HuntingData } from './huntingGoal/hooks'
-import { LocalEconData } from './localEconGoal/hooks'
-import { SettleData } from './settleGoal/hooks'
-import { StartUpData } from './startUpGoal/hooks'
+import {Egg} from 'creeps'
+import {ColonyEconData} from './colonyEconGoal/hooks'
+import {HuntingData} from './huntingGoal/hooks'
+import {LocalEconData} from './localEconGoal/hooks'
+import {SettleData} from './settleGoal/hooks'
+import {StartUpData} from './startUpGoal/hooks'
 
 export enum GoalNames {
   startUp = 'startUp',
@@ -13,8 +13,12 @@ export enum GoalNames {
   settle = 'settle',
 }
 
+export type Status = 'settling' | 'stable' | 'unhealthy' | 'unknown' | 'recovering'
+
 export type Nest = {
   name: string
+
+  status: Status
 
   markers: {
     [name: string]: string

@@ -13,7 +13,7 @@ export const nestGoalData = (nest: string, goal: GoalNames) => {
 }
 
 export const nestMarker = (nest: string, marker: string) =>
-  nestMem(nest).markers[marker]
+  nestMem(nest)?.markers[marker]
 
 export const nestRoom = (nest: string) => Game.rooms[nest]
 

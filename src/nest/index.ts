@@ -27,6 +27,7 @@ export const createNest = (roomName: string): Nest => {
 
   return {
     name: roomName,
+    status: 'settling',
     [GoalNames.startUp]: {},
     [GoalNames.hunting]: {},
     [GoalNames.localEcon]: {},

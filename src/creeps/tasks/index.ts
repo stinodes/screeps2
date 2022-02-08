@@ -31,10 +31,8 @@ export type Task<Name extends TaskNames, TargetId, Target = Id<TargetId>> = {
   complete?: boolean
 }
 
-export const harvest = (
-  creep: Creep,
-  task: Task<TaskNames.harvest, Source>,
-) => {
+export type HarvestTask = Task<TaskNames.harvest, Source>
+export const harvest = (creep: Creep, task: HarvestTask) => {
   const target = Game.getObjectById(task.target)
   if (target && creep.store.getFreeCapacity(RESOURCE_ENERGY)) {
     task.progress = true
@@ -45,10 +43,8 @@ export const harvest = (
   return task
 }
 
-export const store = (
-  creep: Creep,
-  task: Task<TaskNames.store, AnyStoreStructure>,
-) => {
+export type StoreTask = Task<TaskNames.store, AnyStoreStructure>
+export const store = (creep: Creep, task: StoreTask) => {
   const target = Game.getObjectById(task.target)
   if (
     target &&
@@ -63,10 +59,8 @@ export const store = (
   return task
 }
 
-export const drop = (
-  creep: Creep,
-  task: Task<TaskNames.drop, null, string>,
-) => {
+export type DropTask = Task<TaskNames.drop, null, string>
+export const drop = (creep: Creep, task: DropTask) => {
   const pos = deserializePos(task.target)
   if (pos && !!creep.store.getUsedCapacity(RESOURCE_ENERGY)) {
     task.progress = true
@@ -77,10 +71,8 @@ export const drop = (
   return task
 }
 
-export const upgrade = (
-  creep: Creep,
-  task: Task<TaskNames.upgrade, null, null>,
-) => {
+export type UpgradeTask = Task<TaskNames.upgrade, null, null>
+export const upgrade = (creep: Creep, task: UpgradeTask) => {
   if (creep.store.getUsedCapacity(RESOURCE_ENERGY)) {
     task.progress = true
     creepUpgrade(creep)
@@ -90,10 +82,8 @@ export const upgrade = (
   return task
 }
 
-export const weave = (
-  creep: Creep,
-  task: Task<TaskNames.weave, ConstructionSite>,
-) => {
+export type WeaveTask = Task<TaskNames.weave, ConstructionSite>
+export const weave = (creep: Creep, task: WeaveTask) => {
   const target = Game.getObjectById(task.target)
   if (
     target &&
@@ -108,10 +98,8 @@ export const weave = (
   return task
 }
 
-export const repair = (
-  creep: Creep,
-  task: Task<TaskNames.repair, AnyStructure>,
-) => {
+export type RepairTask = Task<TaskNames.repair, AnyStructure>
+export const repair = (creep: Creep, task: RepairTask) => {
   const target = Game.getObjectById(task.target)
   if (
     target &&
@@ -127,10 +115,8 @@ export const repair = (
   return task
 }
 
-export const pickUp = (
-  creep: Creep,
-  task: Task<TaskNames.pickUp, Resource>,
-) => {
+export type PickUpTask = Task<TaskNames.pickUp, Resource>
+export const pickUp = (creep: Creep, task: PickUpTask) => {
   const resource = Game.getObjectById(task.target)
   if (
     resource &&
@@ -145,10 +131,11 @@ export const pickUp = (
   return task
 }
 
-export const withdraw = (
-  creep: Creep,
-  task: Task<TaskNames.withdraw, AnyStoreStructure | Tombstone | Ruin>,
-) => {
+export type WithdrawTask = Task<
+  TaskNames.withdraw,
+  AnyStoreStructure | Tombstone | Ruin
+>
+export const withdraw = (creep: Creep, task: WithdrawTask) => {
   const store = Game.getObjectById(task.target)
   if (
     store &&
@@ -163,10 +150,8 @@ export const withdraw = (
   return task
 }
 
-export const moveToRoom = (
-  creep: Creep,
-  task: Task<TaskNames.moveToRoom, null, string>,
-) => {
+export type MoveToRoomTask = Task<TaskNames.moveToRoom, null, string>
+export const moveToRoom = (creep: Creep, task: MoveToRoomTask) => {
   const exitPos = [0, 49]
   if (
     creep.room.name !== task.target ||
@@ -184,3 +169,14 @@ export const moveToRoom = (
     task.complete = true
   }
 }
+
+export type AllTasks =
+  | HarvestTask
+  | StoreTask
+  | DropTask
+  | PickUpTask
+  | WithdrawTask
+  | WeaveTask
+  | RepairTask
+  | MoveToRoomTask
+  | UpgradeTask
