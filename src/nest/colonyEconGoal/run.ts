@@ -1,12 +1,12 @@
-import {Spooders} from 'creeps'
-import {baseSpider} from 'creeps/baseBehavior'
-import {Colonizer, colonizer} from 'creeps/colonizer'
-import {ColonyCarrier, ColonyCarrierTask} from 'creeps/colonyCarrier'
-import {ColonyHunter} from 'creeps/colonyHunter'
-import {ColonyWorker, ColonyWorkerTask} from 'creeps/colonyWorker'
-import {defender, Defender} from 'creeps/defender'
-import {isCreepEmpty, isCreepFull} from 'creeps/helpers'
-import {hunter} from 'creeps/hunter'
+import { Spooders } from 'creeps'
+import { baseSpider } from 'creeps/baseBehavior'
+import { Colonizer, colonizer } from 'creeps/colonizer'
+import { ColonyCarrier, ColonyCarrierTask } from 'creeps/colonyCarrier'
+import { ColonyHunter } from 'creeps/colonyHunter'
+import { ColonyWorker, ColonyWorkerTask } from 'creeps/colonyWorker'
+import { defender, Defender } from 'creeps/defender'
+import { isCreepEmpty, isCreepFull } from 'creeps/helpers'
+import { hunter } from 'creeps/hunter'
 import {
   colonyCarrierStoreTask,
   dropStoragePosTask,
@@ -20,10 +20,10 @@ import {
   withdrawHuntingContainerTask,
   withdrawHuntingGroundTask,
 } from 'creeps/tasks/taskCreators'
-import {creepPhase, taskForPriority} from 'creeps/tasks/taskPriority'
-import {nestGoalSpoods} from 'nest/helpers'
-import {GoalNames} from 'nest/types'
-import {hooks} from './hooks'
+import { creepPhase, taskForPriority } from 'creeps/tasks/taskPriority'
+import { nestGoalSpoods } from 'nest/helpers'
+import { GoalNames } from 'nest/types'
+import { hooks } from './hooks'
 
 const createWorkerTask = (worker: ColonyWorker) => {
   const colony = worker.data?.colony
@@ -102,6 +102,8 @@ const createCarrierTask = (carrier: ColonyCarrier) => {
       case 'fill':
       default:
         task = taskForPriority<ColonyCarrierTask>([
+          lootTombstoneTask(carrier, colony),
+          pickUpResourceTask(carrier, colony),
           pickUpHuntingGroundResourceTask(carrier, colony),
           withdrawHuntingGroundTask(carrier, colony),
         ])
