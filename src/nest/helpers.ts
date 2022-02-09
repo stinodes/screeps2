@@ -1,7 +1,7 @@
-import { config } from 'config'
-import { creepForName } from 'creeps/helpers'
-import { Task } from 'creeps/tasks'
-import { GoalNames } from './types'
+import {config} from 'config'
+import {creepForName} from 'creeps/helpers'
+import {Task} from 'creeps/tasks'
+import {GoalNames} from './types'
 
 /**
  * ROOM GETTERS
@@ -26,10 +26,10 @@ export const nestLevel = (nest: string) => nestRoom(nest).controller?.level || 0
 export const nestFind = <
   C extends FindConstant,
   FT extends FindTypes[C] = FindTypes[C],
->(
-  nest: string,
-  findC: C,
-  opts?: FilterOptions<C, FT>,
+  >(
+    nest: string,
+    findC: C,
+    opts?: FilterOptions<C, FT>,
 ) => nestRoom(nest).find(findC, opts)
 
 export const nestSpoods = <C extends CreepMemory>(nest: string): C[] =>
@@ -45,7 +45,7 @@ export const nestGoalSpoods = <C extends CreepMemory>(
 
 export const nestStorage = (nest: string) =>
   nestFind(nest, FIND_STRUCTURES, {
-    filter: { structureType: STRUCTURE_STORAGE },
+    filter: {structureType: STRUCTURE_STORAGE},
   })[0] as void | StructureStorage
 
 /**
@@ -55,16 +55,16 @@ export const nestStorage = (nest: string) =>
 export const oneOfStructures = <
   S extends AnyStructure,
   T extends StructureConstant,
->(
-  structure: S,
-  types: T[],
+  >(
+    structure: S,
+    types: T[],
 ) => types.includes(structure.structureType as T)
 
 export const sortByRange = <O extends RoomObject>(o: O[], pos: RoomPosition) =>
   o
-    .map(obj => ({ value: obj, range: pos.findPathTo(obj.pos).length }))
+    .map(obj => ({value: obj, range: pos.findPathTo(obj.pos).length}))
     .sort((a, b) => a.range - b.range)
-    .map(({ value }) => value)
+    .map(({value}) => value)
 
 export const relativePos = (pos: RoomPosition, dx: number, dy: number) =>
   new RoomPosition(pos.x + dx, pos.y + dy, pos.roomName)
@@ -102,7 +102,7 @@ export const getFreeSources = (nest: string) => {
   const sources = room.find(FIND_SOURCES).filter(source => {
     const adjSq = getEmptyAdjecentSquares(source.pos)
     const spoods = (
-      nestSpoods(nest) as (CreepMemory & { task?: Task<any, any> })[]
+      nestSpoods(nest) as (CreepMemory & {task?: Task<any, any>})[]
     ).filter(s => s.task?.target === source.id)
     return spoods.length <= adjSq.length
   })
@@ -114,7 +114,7 @@ export const getFreeSource = (nest: string, s: CreepMemory) => {
   const sources = room.find(FIND_SOURCES).filter(source => {
     const adjSq = getEmptyAdjecentSquares(source.pos)
     const spoods = (
-      nestSpoods(nest) as (CreepMemory & { task?: Task<any, any> })[]
+      nestSpoods(nest) as (CreepMemory & {task?: Task<any, any>})[]
     ).filter(s => s.task?.target === source.id)
     return spoods.length <= adjSq.length
   })
@@ -132,5 +132,9 @@ export const isObjectEmpty = (obj: Resource | AnyStoreStructure | null) => {
   return true
 }
 
-export const structureNeedsRepair = (structure: AnyStructure) =>
-  structure.hits < structure.hitsMax && structure.hits < config.maxHits
+export const structureNeedsRepair = (structure: AnyStructure) => {
+  const canRepair = structure.hits < structure.hitsMax
+  if (oneOfStructures(structure, [STRUCTURE_ROAD, STRUCTURE_RAMPART]))
+    return canRepair && structure.hits < config.maxHits
+  return canRepair
+}
