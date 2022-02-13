@@ -134,7 +134,7 @@ export const isObjectEmpty = (obj: Resource | AnyStoreStructure | null) => {
 
 export const structureNeedsRepair = (structure: AnyStructure) => {
   const canRepair = structure.hits < structure.hitsMax
-  if (oneOfStructures(structure, [STRUCTURE_ROAD, STRUCTURE_RAMPART]))
+  if (oneOfStructures(structure, [STRUCTURE_WALL, STRUCTURE_ROAD, STRUCTURE_RAMPART]))
     return canRepair && structure.hits < config.maxHits
   return canRepair
 }
